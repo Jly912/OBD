@@ -1,0 +1,66 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/pic_pop_normal"
+    android:padding="5dp" >
+    <TextView
+        android:id="@+id/tv_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxWidth="200dp"
+        android:text="xxxxx"/>
+
+    <LinearLayout
+        android:id="@+id/ll_bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_below="@id/tv_content" >
+
+        <Button
+            android:id="@+id/btn_track"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/tracking"
+            android:textColor="@color/white" />
+
+        <View
+            android:layout_width="0.5dp"
+            android:layout_height="match_parent"
+            android:layout_margin="2dp"
+            android:background="@color/bg_gray" />
+
+        <Button
+            android:id="@+id/btn_tracka"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/tracking"
+            android:textColor="@color/white" />
+
+        <View
+            android:layout_width="0.5dp"
+            android:layout_height="match_parent"
+            android:layout_margin="2dp"
+            android:background="@color/bg_gray" />
+
+        <Button
+            android:id="@+id/btn_trackb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/tracking"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/v_line"
+        android:layout_width="wrap_content"
+        android:layout_height="0.5dp"
+        android:layout_above="@id/ll_bottom"
+        android:layout_alignRight="@id/ll_bottom"
+        android:layout_alignLeft="@id/ll_bottom"
+        android:background="@color/bg_gray" />
+
+
+</RelativeLayout>

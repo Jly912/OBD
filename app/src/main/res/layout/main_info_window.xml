@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="200dp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/pic_pop_normal"
+    android:orientation="vertical"
+    android:padding="5dp">
+
+    <TextView
+        android:id="@+id/tv_content"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:maxWidth="200dp"
+        android:text="xxxx"
+        android:textColor="@color/text_black" />
+
+    <View
+        android:id="@+id/v_l"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/board_gray" />
+
+    <RelativeLayout
+        android:id="@+id/rl_content"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:padding="5dp">
+
+        <TextView
+            android:id="@+id/tv_status"
+            style="@style/TextViewStyle"
+            android:text="状态：静止(18小时3分钟)" />
+
+        <TextView
+            android:id="@+id/tv_loc"
+            style="@style/TextViewStyle"
+            android:layout_below="@+id/tv_status"
+            android:text="定位：GPS" />
+
+        <TextView
+            android:id="@+id/tv_vol"
+            style="@style/TextViewStyle"
+            android:layout_above="@+id/tv_time"
+            android:layout_below="@+id/tv_status"
+            android:layout_marginLeft="20dp"
+            android:layout_toRightOf="@+id/tv_loc"
+            android:text="电压：3.58V" />
+
+        <TextView
+            android:id="@+id/tv_time"
+            style="@style/TextViewStyle"
+            android:layout_below="@+id/tv_loc"
+            android:text="时间：2017-7-27 12:00:01" />
+
+        <TextView
+            android:id="@+id/tv_direct"
+            style="@style/TextViewStyle"
+            android:layout_below="@+id/tv_time"
+            android:text="方向：正北" />
+
+
+        <TextView
+            android:id="@+id/tv_speed"
+            style="@style/TextViewStyle"
+            android:layout_below="@+id/tv_direct"
+            android:text="速度：0.00km/h" />
+
+
+        <TextView
+            android:id="@+id/tv_ele"
+            style="@style/TextViewStyle"
+            android:layout_below="@+id/tv_speed"
+            android:text="电量：80%" />
+
+
+        <TextView
+            android:id="@+id/tv_ad"
+            style="@style/TextViewStyle"
+            android:layout_below="@+id/tv_ele"
+            android:ellipsize="end"
+            android:text="地址：深圳市-----------------------------。。。" />
+    </RelativeLayout>
+
+
+    <View
+        android:id="@+id/v_line"
+        android:layout_width="200dp"
+        android:layout_height="0.5dp"
+        android:background="@color/board_gray" />
+
+    <LinearLayout
+        android:id="@+id/ll_bottom"
+        android:layout_width="200dp"
+        android:layout_height="30dp"
+        android:orientation="horizontal"
+        android:divider="@drawable/ll_divider5"
+        android:showDividers="middle">
+
+        <Button
+            android:id="@+id/btn_track"
+            style="@style/ButtonStyleLocation"
+            android:text="@string/tracking"
+             />
+
+        <Button
+            android:id="@+id/btn_locus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/selector_btn_transparent"
+            android:text="@string/locus"
+            android:textColor="@color/shape_gray" />
+
+        <Button
+            android:id="@+id/btn_street"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/selector_btn_transparent"
+            android:text="@string/street_view"
+            android:textColor="@color/shape_gray" />
+
+        <Button
+            android:id="@+id/btn_command"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/selector_btn_transparent"
+            android:text="@string/command"
+            android:textColor="@color/shape_gray" />
+    </LinearLayout>
+
+
+</LinearLayout>

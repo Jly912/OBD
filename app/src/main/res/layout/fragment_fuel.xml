@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/tab_bg"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/actionbar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/tab_bg"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:padding="10dp">
+
+            <Spinner
+                android:id="@+id/sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:spinnerMode="dropdown"
+                android:layout_centerVertical="true" />
+
+            <ImageButton
+                android:id="@+id/iv_drop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/sp"
+                android:background="@null"
+                android:padding="5dp"
+                android:src="@drawable/btn_dropdown_normal" />
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="@string/oil"
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/tv_rank"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="20dp"
+                android:layout_toLeftOf="@+id/tv_detail"
+                android:text="@string/rank"
+                android:textColor="@color/btn_blue" />
+
+
+            <TextView
+                android:id="@+id/tv_detail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:text="@string/detail_data"
+                android:textColor="@color/btn_blue" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:divider="@drawable/ll_divider2"
+            android:orientation="vertical"
+            android:showDividers="middle">
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/tv_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/fuel_of_day"
+                    android:textColor="@color/text_black"
+                    android:layout_margin="10dp"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/tv_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:text="@string/day_of_date"
+                    android:textColor="@color/board_gray"
+                    android:layout_margin="10dp"
+                    android:textSize="14sp" />
+
+                <View
+                    android:id="@+id/v1"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:layout_below="@+id/tv_1"
+                    android:background="@color/board_gray"
+                    android:layout_marginLeft="10dp"/>
+
+
+                <lecho.lib.hellocharts.view.ColumnChartView
+                    android:id="@+id/column_chart"
+                    android:layout_width="match_parent"
+                    android:layout_below="@+id/v1"
+                    android:layout_margin="10dp"
+                    android:layout_height="200dp"
+                    />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/tv_3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/fuel_of_week"
+                    android:textColor="@color/text_black"
+                    android:layout_margin="10dp"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/tv_4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:text="@string/week_of_date"
+                    android:textColor="@color/board_gray"
+                    android:layout_margin="10dp"
+                    android:textSize="14sp" />
+
+                <View
+                    android:id="@+id/v2"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:layout_below="@+id/tv_3"
+                    android:background="@color/board_gray"
+                    android:layout_marginLeft="10dp"/>
+
+
+                <lecho.lib.hellocharts.view.LineChartView
+                    android:id="@+id/lineChart"
+                    android:layout_width="match_parent"
+                    android:layout_below="@+id/v2"
+                    android:layout_margin="10dp"
+                    android:layout_height="200dp"
+                    />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/tv_5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/fuel_of_month"
+                    android:textColor="@color/text_black"
+                    android:layout_margin="10dp"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/tv_6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:text="@string/month_of_date"
+                    android:textColor="@color/board_gray"
+                    android:layout_margin="10dp"
+                    android:textSize="14sp" />
+
+                <View
+                    android:id="@+id/v3"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:layout_below="@+id/tv_5"
+                    android:background="@color/board_gray"
+                    android:layout_marginLeft="10dp"/>
+
+
+                <lecho.lib.hellocharts.view.PieChartView
+                    android:id="@+id/pineChart"
+                    android:layout_width="match_parent"
+                    android:layout_below="@+id/v3"
+                    android:layout_margin="10dp"
+                    android:layout_height="200dp"
+                    />
+            </RelativeLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

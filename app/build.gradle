@@ -1,0 +1,58 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.0"
+    // 取消掉系统对.9图片的检查
+    aaptOptions.cruncherEnabled = false
+    aaptOptions.useNewCruncher = false
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
+    defaultConfig {
+        applicationId "com.yw.obd"
+        minSdkVersion 19
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:25.0.0'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    testCompile 'junit:junit:4.12'
+    //    compile 'com.github.lecho:hellocharts-library:1.5.8@aar'
+    compile 'com.github.lecho:hellocharts-android:v1.5.8'
+    compile 'com.google.code.gson:gson:2.2.4'
+    compile 'com.android.support:cardview-v7:25.0.0'
+    compile 'com.android.support:design:25.0.0'
+    compile 'com.android.support:recyclerview-v7:25.0.0'
+    //屏幕适配
+    compile 'com.android.support:percent:25.0.0'
+    //为了保持在低版本Sdk中的UI的一致性，引入material date time picker库
+    compile 'com.wdullaer:materialdatetimepicker:2.5.0'
+    compile 'com.jakewharton:butterknife:7.0.1'
+    compile files('libs/BaiduLBS_Android.jar')
+    compile 'com.github.lecho:hellocharts-android:v1.5.8'
+    compile 'de.hdodenhof:circleimageview:2.1.0'
+    compile files('libs/ksoap2-android-assembly-2.6.0-jar-with-dependencies.jar')
+
+    //进度条
+    compile 'com.wang.avi:library:2.1.3'
+}

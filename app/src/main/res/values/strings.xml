@@ -1,0 +1,152 @@
+<resources>
+    <string name="app_name">洁节高</string>
+    <string name="login">登录</string>
+    <string name="remember_pwd">记住密码</string>
+    <string name="forget_pwd">忘记密码？</string>
+    <string name="login_user_hint">请输入用户名...</string>
+    <string name="login_pwd_hint">请输入密码...</string>
+    <string name="login_experience">我要体验</string>
+    <string name="phone_register">手机注册</string>
+    <string name="mine">我的</string>
+    <string name="home">首页</string>
+    <string name="car">车辆</string>
+    <string name="oil">油耗</string>
+    <string name="co">碳排</string>
+    <string name="register_phone_hint">请输入手机号...</string>
+    <string name="register_code_hint">请输入验证码...</string>
+    <string name="register_pwd_hint">请设置密码...</string>
+    <string name="register_pwd2_hint">再次确认密码...</string>
+    <string name="send_code">发送验证码</string>
+    <string name="btn_next">下一步</string>
+    <string name="location">我的位置</string>
+    <string name="tracking">追踪</string>
+    <string name="locus">轨迹</string>
+    <string name="command">命令</string>
+    <string name="street_view">街景</string>
+    <string name="rank">排名</string>
+    <string name="detail_data">详细数据</string>
+
+    <string name="fuel_of_day">每日百公里油耗</string>
+    <string name="fuel_of_week">每周百公里油耗</string>
+    <string name="fuel_of_month">每月百公里油耗</string>
+
+    <string name="day_of_date">日期(日)</string>
+    <string name="week_of_date">日期(周)</string>
+    <string name="month_of_date">日期(月)</string>
+
+    <string name="accelerate">急加速</string>
+    <string name="moderate">急减速</string>
+    <string name="brake">急刹车</string>
+    <string name="turn">急转弯</string>
+
+    <string name="average_fuel">平均油耗</string>
+    <string name="average_speed">平均速度</string>
+    <string name="fuel_spend">耗油量</string>
+    <string name="drive_time">行驶时间</string>
+    <string name="reference_money">参考油费</string>
+
+    <string name="reset">重置</string>
+    <string name="track_record">轨迹记录</string>
+    <string name="load_all_record">已加载全部记录</string>
+
+    <string name="my_car">我的车辆</string>
+    <string name="my_report">我的报告</string>
+    <string name="normal_question">常见问题</string>
+    <string name="alter_pwd">修改密码</string>
+    <string name="about_app">关于APP</string>
+    <string name="feedback">意见反馈</string>
+
+    <string name="time">时间</string>
+    <string name="personal_profile">个人资料</string>
+    <string name="icon">头像</string>
+    <string name="name">姓名</string>
+    <string name="sex">性别</string>
+    <string name="tel">联系电话</string>
+    <string name="add">家庭住址</string>
+
+    <string name="add_car">添加车辆</string>
+    <string name="car_num">车牌号</string>
+    <string name="car_brand">车辆品牌</string>
+    <string name="car_type">车型</string>
+    <string name="model_year">年款</string>
+    <string name="gear_case">变速箱</string>
+    <string name="displacement">排量</string>
+    <string name="cur_km">当前仪表盘里程数</string>
+    <string name="hint_input_car_num">请输入车辆完整车牌号...</string>
+    <string name="hint_input_carriage_num">请输入车架号...</string>
+    <string name="hint_input_IMEI_num">请填写设备IMEI号...</string>
+    <string name="hint_input_car_km">请输入里程数...</string>
+    <string name="carriage_num">车架号（VIN码）</string>
+    <string name="device_num">设备号（IMEI号）</string>
+    <string name="carriage_instruction">  车架号（车辆识别VIN）一般在挡风玻璃的左上角或右下角，或在车辆行驶中查找...</string>
+    <string name="submit">确定</string>
+    <string name="base_info">基本信息</string>
+
+    <string name="loading">数据加载中. . . 请等待</string>
+    <string name="waring_internet_error">网络连接失败</string>
+    <string name="login_succ">登录成功</string>
+    <string name="login_failed">登录失败</string>
+    <string name="user_empty">用户名不存在</string>
+    <string name="name_or_pwd_error">用户名或密码错误</string>
+    <string name="exe_error">程序报错</string>
+    <string name="key_error">key值不匹配</string>
+    <string name="network_unable">当前网络不可用</string>
+    <string name="mobile_unable">手机网络不可用</string>
+    <string name="input_empty">输入框不能为空</string>
+    <string name="register">注册</string>
+    <string name="send_failed">发送失败</string>
+    <string name="send_succ">发送成功</string>
+    <string name="over_limit">超过限制</string>
+    <string name="sms_send_frequency">短信发送频率过快</string>
+    <string name="pwd_not_same">密码输入不一致</string>
+    <string name="code_empty">验证码不能为空</string>
+    <string name="code_over_time">验证码已过期</string>
+    <string name="code_error">验证码错误</string>
+    <string name="register_succ">注册成功</string>
+    <string name="register_failed">注册失败</string>
+    <string name="congratulation_succ">恭喜您！注册成功！</string>
+    <string name="login_at_once">立即登录</string>
+    <string name="user_existed">手机号已注册</string>
+    <string name="select_car">选择车辆</string>
+    <string name="select_car_brand">选择车辆品牌</string>
+    <string name="select_car_model">选择车型</string>
+    <string name="select_car_year">选择年款</string>
+    <string name="cancel">取消</string>
+    <string name="complete_info">请完善车辆资料</string>
+
+    <string name="sn_exist">设备号已经存在</string>
+    <string name="car_exist">车牌号已经存在</string>
+    <string name="sn_not_exist">设备号不存在</string>
+    <string name="sn_has_add">设备号已经添加</string>
+    <string name="add_succ">添加成功</string>
+    <string name="add_failed">添加失败</string>
+    <string name="add_same">重复添加</string>
+
+    <string name="status">状态：</string>
+    <string name="locate">定位：</string>
+    <string name="direct">方向：</string>
+    <string name="speed">速度：</string>
+    <string name="power">电量：</string>
+    <string name="address">地址：</string>
+    <string name="voltage">电压：</string>
+
+
+    <string name="unable">未启用</string>
+    <string name="sport">运动</string>
+    <string name="quiet">静止</string>
+    <string name="offline">离线</string>
+    <string name="arrears">欠费</string>
+
+    <string name="base_station">基站</string>
+    <string name="gps">GPS</string>
+    <string name="wifi">WIFI</string>
+
+    <string name="course_N">正北</string>
+    <string name="course_EN">东北</string>
+    <string name="course_E">正东</string>
+    <string name="course_ES">东南</string>
+    <string name="course_S">正南</string>
+    <string name="course_WS">西南</string>
+    <string name="course_W">正西</string>
+    <string name="course_WN">西北</string>
+</resources>
