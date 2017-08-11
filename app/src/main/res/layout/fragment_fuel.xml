@@ -16,14 +16,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:padding="10dp">
+            >
 
             <Spinner
                 android:id="@+id/sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:spinnerMode="dropdown"
-                android:layout_centerVertical="true" />
+                android:layout_centerInParent="true" />
 
             <ImageButton
                 android:id="@+id/iv_drop"
@@ -33,6 +33,7 @@
                 android:layout_toRightOf="@+id/sp"
                 android:background="@null"
                 android:padding="5dp"
+                android:visibility="gone"
                 android:src="@drawable/btn_dropdown_normal" />
 
             <TextView
@@ -41,6 +42,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="@string/oil"
+                android:visibility="gone"
                 android:textColor="@color/white"
                 android:textSize="20sp" />
 
@@ -49,9 +51,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="20dp"
-                android:layout_toLeftOf="@+id/tv_detail"
                 android:text="@string/rank"
+                android:layout_marginLeft="10dp"
                 android:textColor="@color/btn_blue" />
 
 
@@ -61,6 +62,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
+                android:layout_marginRight="10dp"
                 android:text="@string/detail_data"
                 android:textColor="@color/btn_blue" />
         </RelativeLayout>

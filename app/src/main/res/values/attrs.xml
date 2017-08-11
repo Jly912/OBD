@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="BarView">
+        <attr name="bg_source" format="reference" />
+        <attr name="bar_source" format="reference" />
+    </declare-styleable>
+</resources>

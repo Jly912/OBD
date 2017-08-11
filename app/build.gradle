@@ -53,6 +53,5 @@ dependencies {
     compile 'de.hdodenhof:circleimageview:2.1.0'
     compile files('libs/ksoap2-android-assembly-2.6.0-jar-with-dependencies.jar')
 
-    //进度条
-    compile 'com.wang.avi:library:2.1.3'
+
 }

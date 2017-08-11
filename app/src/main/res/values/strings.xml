@@ -149,4 +149,38 @@
     <string name="course_WS">西南</string>
     <string name="course_W">正西</string>
     <string name="course_WN">西北</string>
+
+    <string name="no_msg">没有查询到相关数据</string>
+    <string name="start_point">起点</string>
+    <string name="end_point">终点</string>
+    <string name="stop">停留</string>
+    <string name="minute">分钟</string>
+    <string name="hour">小时</string>
+    <string name="day">天</string>
+
+    <string name="refuse_enter">访问被拒绝！</string>
+    <string name="waring">注意</string>
+    <string name="waring_start_time_is_after_end">开始时间比结束时间更大</string>
+    <string name="waring_time">请搜索一天范围内的历史轨迹</string>
+    <string name="confirm">确认</string>
+    <string name="current_oil_price">实时油价</string>
+    <string name="oil_price">油价</string>
+    <string name="yuan_l">元/升</string>
+    <string name="yuan">元</string>
+    <string name="input_oil">请输入油价</string>
+    <string name="update_succ">修改成功</string>
+    <string name="update_failed">修改失败</string>
+    <string name="phone_number">手机号：</string>
+    <string name="man">男</string>
+    <string name="woman">女</string>
+    <string name="input_name">请输入名字</string>
+    <string name="select_sex">请选择性别</string>
+    <string name="input_tel">请输入联系电话</string>
+    <string name="input_add">请输入家庭住址</string>
+    <string name="birth">生日</string>
+    <string name="install_navi_first">请先安装导航APP</string>
+    <string name="select_before">请选择今天之前的日期</string>
+    <string name="checkCar">汽车检测</string>
+    <string name="checking">正在检测，请稍候...</string>
+    <string name="check_succ">检测完成...</string>
 </resources>

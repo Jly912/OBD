@@ -10,13 +10,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:padding="10dp">
+        >
 
         <Spinner
             android:id="@+id/sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true" />
+            android:layout_centerInParent="true"/>
 
         <ImageButton
             android:id="@+id/iv_drop"
@@ -26,14 +26,15 @@
             android:layout_toRightOf="@+id/sp"
             android:background="@null"
             android:padding="5dp"
-            android:visibility="gone"
-            android:src="@drawable/btn_dropdown_normal" />
+            android:src="@drawable/btn_dropdown_normal"
+            android:visibility="gone" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="@string/home"
+            android:visibility="gone"
             android:textColor="@color/white"
             android:textSize="20sp" />
 
@@ -49,10 +50,17 @@
 
     </RelativeLayout>
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:gravity="center">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/car" />
+    </LinearLayout>
 
 
     <TextView

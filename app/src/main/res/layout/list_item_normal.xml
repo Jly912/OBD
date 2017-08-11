@@ -102,12 +102,12 @@
 
     <RelativeLayout
         android:id="@+id/ll_right"
-        android:layout_width="80dp"
+        android:layout_width="100dp"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:gravity="center"
-        android:padding="10dp">
+        android:padding="5dp">
 
         <ImageView
             android:id="@+id/iv1"
@@ -119,6 +119,7 @@
         <LinearLayout
             android:id="@+id/ll"
             android:layout_width="wrap_content"
+            android:layout_centerHorizontal="true"
             android:layout_height="wrap_content"
             android:layout_below="@+id/iv1"
             android:layout_marginTop="10dp"
@@ -135,7 +136,6 @@
                 android:id="@+id/tv_km"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="92.6km"
                 android:layout_marginLeft="2dp"
                 android:textColor="#f00" />
         </LinearLayout>
@@ -143,11 +143,12 @@
 
         <TextView
             android:id="@+id/tv_time"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_centerHorizontal="true"
             android:layout_below="@+id/ll"
             android:layout_marginTop="5dp"
-            android:text="停留4小时8分钟"
             android:textColor="#f00" />
 
     </RelativeLayout>

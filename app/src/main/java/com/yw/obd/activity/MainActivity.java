@@ -41,7 +41,10 @@ public class MainActivity extends BaseActivity implements RadioGroup.OnCheckedCh
 
     @Override
     protected void init() {
-        mineFragment=MineFragment.getInstance();
+        mineFragment = MineFragment.getInstance();
+        carFragment = CarFragment.getInstance();
+        homeFragment = HomeFragment.getInstance();
+        fuelFragment = FuelFragment.getInstance();
 
         rgHome.getChildAt(0).performClick();//模拟点击
         rgHome.setOnCheckedChangeListener(this);
@@ -57,21 +60,21 @@ public class MainActivity extends BaseActivity implements RadioGroup.OnCheckedCh
                 rbOil.setTextColor(getResources().getColor(R.color.board_gray));
                 rbMine.setTextColor(getResources().getColor(R.color.board_gray));
 
-                showFragment(R.id.fl_zw, new HomeFragment());
+                showFragment(R.id.fl_zw, homeFragment);
                 break;
             case R.id.rb_car:
                 rbCar.setTextColor(getResources().getColor(R.color.btn_blue));
                 rbHome.setTextColor(getResources().getColor(R.color.board_gray));
                 rbOil.setTextColor(getResources().getColor(R.color.board_gray));
                 rbMine.setTextColor(getResources().getColor(R.color.board_gray));
-                showFragment(R.id.fl_zw, new CarFragment());
+                showFragment(R.id.fl_zw, carFragment);
                 break;
             case R.id.rb_oil:
                 rbOil.setTextColor(getResources().getColor(R.color.btn_blue));
                 rbCar.setTextColor(getResources().getColor(R.color.board_gray));
                 rbHome.setTextColor(getResources().getColor(R.color.board_gray));
                 rbMine.setTextColor(getResources().getColor(R.color.board_gray));
-                showFragment(R.id.fl_zw, new FuelFragment());
+                showFragment(R.id.fl_zw, fuelFragment);
                 break;
             case R.id.rb_mine:
                 rbMine.setTextColor(getResources().getColor(R.color.btn_blue));

@@ -1,8 +1,11 @@
 package com.yw.obd.fragment;
 
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
@@ -12,10 +15,11 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.yw.obd.R;
+import com.yw.obd.activity.CarCheckActivity;
 import com.yw.obd.base.BaseFragment;
 import com.yw.obd.entity.DeviceInfo;
 import com.yw.obd.entity.DeviceListInfo;
-import com.yw.obd.http.WebService;
+import com.yw.obd.http.Http;
 import com.yw.obd.util.AppData;
 
 import org.json.JSONException;
@@ -33,7 +37,7 @@ import butterknife.OnClick;
  * Created by apollo on 2017/7/25.
  */
 
-public class HomeFragment extends BaseFragment implements WebService.WebServiceListener {
+public class HomeFragment extends BaseFragment {
     @Bind(R.id.sp)
     Spinner sp;
     @Bind(R.id.iv_drop)
@@ -48,11 +52,14 @@ public class HomeFragment extends BaseFragment implements WebService.WebServiceL
     ImageButton ivEngine;
     @Bind(R.id.tv_co)
     TextView tvCo;
-    private static final int GET_DEVICE_LIST = 1;
-    private static final int GET_DEVICE = 2;
-    private static final String KEY = "20170801CHLOBDYW028M";
-
     private List<Map<String, Object>> spData;
+    private String device_id,carName;
+    private AlertDialog loadingDia = null;
+
+    public static HomeFragment getInstance() {
+        HomeFragment homeFragment = new HomeFragment();
+        return homeFragment;
+    }
 
     @Override
     protected int getLayoutId() {
@@ -62,11 +69,20 @@ public class HomeFragment extends BaseFragment implements WebService.WebServiceL
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        View inflate = LayoutInflater.from(getActivity()).inflate(R.layout.progressdialog, null);
+        loadingDia = new AlertDialog.Builder(getActivity())
+                .setCancelable(false)
+                .setView(inflate)
+                .create();
+        loadingDia.show();
+
         getDeviceList();
     }
 
-    private void initSpanner(final DeviceListInfo deviceListInfo) {
+    private int selectposition = 0;
+    private String deviceId = "";
 
+    private void initSpanner(final DeviceListInfo deviceListInfo, int selectDevice) {
         sp.setPrompt(getResources().getString(R.string.select_car));
         spData = new ArrayList<>();
         for (int i = 0; i < deviceListInfo.getArr().size(); i++) {
@@ -74,16 +90,25 @@ public class HomeFragment extends BaseFragment implements WebService.WebServiceL
             map.put("name", deviceListInfo.getArr().get(i).getName());
             map.put("number", deviceListInfo.getArr().get(i).getCarNum());
             spData.add(map);
+
+            DeviceListInfo.ArrBean arrBean = deviceListInfo.getArr().get(i);
+            if (Integer.parseInt(arrBean.getId()) == selectDevice) {
+                selectposition = i;
+                deviceId = arrBean.getId();
+            }
         }
 
+        Log.e("print", "Home----" + AppData.GetInstance(getActivity()).getSelectedDevice() + "______" + deviceId);
         SimpleAdapter adapter = new SimpleAdapter(getActivity(), spData, R.layout.layout_spinner, new String[]{"name", "number"},
                 new int[]{R.id.tv_car, R.id.tv_car_number});
         sp.setAdapter(adapter);
+        sp.setSelection(selectposition);
+
         sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Log.d("print", "position" + position);
-                String device_id = deviceListInfo.getArr().get(position).getId();
+                device_id = deviceListInfo.getArr().get(position).getId();
+                carName=deviceListInfo.getArr().get(position).getName();
                 getDevice(device_id);
                 AppData.GetInstance(getActivity()).setSelectedDevice(Integer.parseInt(device_id));
             }
@@ -102,62 +127,69 @@ public class HomeFragment extends BaseFragment implements WebService.WebServiceL
                 break;
             case R.id.iv_alarm:
                 break;
-            case R.id.iv_engine:
+            case R.id.iv_engine://检测
+                Intent intent = new Intent(getActivity(), CarCheckActivity.class);
+                intent.putExtra("id", device_id);
+                intent.putExtra("name",carName);
+                getActivity().startActivity(intent);
                 break;
         }
     }
 
     private void getDeviceList() {
-        WebService web = new WebService(getActivity(), GET_DEVICE_LIST, false, "GetDeviceList");
-        HashMap<String, Object> property = new HashMap<>();
-        property.put("key", KEY);
-        property.put("loginName", AppData.GetInstance(getActivity()).getUserName());
-        property.put("password", AppData.GetInstance(getActivity()).getUserPass());
-        web.addWebServiceListener(this);
-        web.SyncGet(property);
+        if (loadingDia != null && loadingDia.isShowing()) {
+            loadingDia.dismiss();
+        }
+        Http.getDeviceList(getActivity(), new Http.OnListener() {
+            @Override
+            public void onSucc(Object object) {
+                String res = (String) object;
+                try {
+                    int state = Integer.parseInt(new JSONObject(res).getString("state"));
+                    switch (state) {
+                        case 0:
+                            DeviceListInfo deviceListInfo = new Gson().fromJson(res, DeviceListInfo.class);
+                            initSpanner(deviceListInfo, AppData.GetInstance(getActivity()).getSelectedDevice());
+                            break;
+                        case 2002:
+                            AppData.showToast(getActivity(), R.string.no_msg);
+                            break;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
     }
 
     private void getDevice(String id) {
-        WebService web = new WebService(getActivity(), GET_DEVICE, false, "GetDeviceDetail");
-        HashMap<String, Object> property = new HashMap<>();
-        property.put("key", KEY);
-        property.put("loginName", AppData.GetInstance(getActivity()).getUserName());
-        property.put("password", AppData.GetInstance(getActivity()).getUserPass());
-        property.put("deviceID", id);
-        web.addWebServiceListener(this);
-        web.SyncGet(property);
+        Http.getDeviceDetail(getActivity(), id, new Http.OnListener() {
+            @Override
+            public void onSucc(Object object) {
+                String res = (String) object;
+                try {
+                    int state = Integer.parseInt(new JSONObject(res).getString("state"));
+                    switch (state) {
+                        case 0:
+                            DeviceInfo deviceInfo = new Gson().fromJson(res, DeviceInfo.class);
+                            break;
+                        case 1009://没有权限
+                            break;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
-    private int state = -1;
 
     @Override
-    public void onWebServiceReceive(String method, int id, String result) {
-        try {
-            JSONObject jsonObject = new JSONObject(result);
-            state = Integer.parseInt(jsonObject.getString("state"));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        if (id == GET_DEVICE_LIST) {
-            switch (state) {
-                case 0://查询成功
-                    DeviceListInfo deviceListInfo = new Gson().fromJson(result, DeviceListInfo.class);
-                    initSpanner(deviceListInfo);
-                    break;
-                case 2002://没有查询到任何设备
-                    break;
-            }
-
-
-        } else if (id == GET_DEVICE){
-            switch (state){
-                case 0:
-                    DeviceInfo deviceInfo = new Gson().fromJson(result, DeviceInfo.class);
-
-                    break;
-                case 1009://没有权限
-                    break;
-            }
+    public void onHiddenChanged(boolean hidden) {
+        if (!hidden) {
+            loadingDia.show();
+            getDeviceList();
         }
     }
 }

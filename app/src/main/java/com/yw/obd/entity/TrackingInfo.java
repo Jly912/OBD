@@ -29,6 +29,33 @@ public class TrackingInfo implements Serializable {
     private String isStop;
     private String isGPS;
     private String status;
+    private String oLat;
+    private String oLng;
+    private String dy;
+
+    public String getDy() {
+        return dy;
+    }
+
+    public void setDy(String dy) {
+        this.dy = dy;
+    }
+
+    public String getoLat() {
+        return oLat;
+    }
+
+    public void setoLat(String oLat) {
+        this.oLat = oLat;
+    }
+
+    public String getoLng() {
+        return oLng;
+    }
+
+    public void setoLng(String oLng) {
+        this.oLng = oLng;
+    }
 
     public String getState() {
         return state;

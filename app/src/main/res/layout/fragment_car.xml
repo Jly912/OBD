@@ -10,13 +10,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:padding="10dp">
+        >
 
         <Spinner
             android:id="@+id/sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true" />
+            android:layout_centerInParent="true" />
 
         <ImageButton
             android:id="@+id/iv_drop"
@@ -26,7 +26,8 @@
             android:layout_toRightOf="@+id/sp"
             android:background="@null"
             android:padding="5dp"
-            android:src="@drawable/btn_dropdown_normal" />
+            android:src="@drawable/btn_dropdown_normal"
+            android:visibility="gone" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -34,7 +35,8 @@
             android:layout_centerInParent="true"
             android:text="@string/car"
             android:textColor="@color/white"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:visibility="gone" />
 
 
     </RelativeLayout>
@@ -42,6 +44,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <com.baidu.mapapi.map.MapView
             android:id="@+id/map"
             android:layout_width="fill_parent"

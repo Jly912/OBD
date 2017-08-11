@@ -26,6 +26,10 @@
         <item name="android:button">@drawable/selector_login_cb</item>
     </style>
 
+    <style name="CheckGPSStyle">
+        <item name="android:button">@drawable/seletor_gps</item>
+    </style>
+
     <style name="RadioButtonStyle">
         <item name="android:layout_weight">1</item>
         <item name="android:layout_width">0dp</item>

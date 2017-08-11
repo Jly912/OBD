@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_gray"
+    android:orientation="vertical">
+
+    <include layout="@layout/layout_actionbar" />
+
+    <LinearLayout
+        android:id="@+id/ll_oil"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="@color/white"
+        android:padding="10dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/oil_price"
+            android:textColor="@color/tab_bg"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/et_oil"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:text="0.0"
+            android:background="@drawable/shape_et_oil"
+            android:textColor="@color/tab_bg" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/yuan_l"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+</LinearLayout>

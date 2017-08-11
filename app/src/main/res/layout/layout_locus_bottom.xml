@@ -36,8 +36,7 @@
             <TextView
                 android:id="@+id/tv_accelerate"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0" />
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
         <LinearLayout
@@ -60,8 +59,7 @@
             <TextView
                 android:id="@+id/tv_moderate"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0" />
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
         <LinearLayout
@@ -84,8 +82,7 @@
             <TextView
                 android:id="@+id/tv_brake"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0" />
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
         <LinearLayout
@@ -108,8 +105,7 @@
             <TextView
                 android:id="@+id/tv_turn"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0" />
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
 
@@ -144,7 +140,6 @@
                 android:id="@+id/tv_ave_fuel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="8.2L/199KM"
                 android:textColor="@color/text_black" />
 
             <TextView
@@ -185,7 +180,6 @@
                 android:id="@+id/tv_ave_speed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="48Km/H"
                 android:textColor="@color/text_black" />
 
             <TextView
@@ -227,7 +221,6 @@
                     android:id="@+id/tv_drive_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="1小时55分钟"
                     android:textColor="@color/text_black" />
 
                 <TextView
@@ -269,7 +262,6 @@
                     android:id="@+id/tv_ref_money"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="49.3元"
                     android:textColor="@color/text_black" />
 
                 <TextView
@@ -312,7 +304,6 @@
                     android:id="@+id/tv_spend_fuel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="8.2L"
                     android:textColor="@color/text_black" />
 
                 <TextView

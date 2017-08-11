@@ -6,11 +6,25 @@
 
     <include layout="@layout/layout_actionbar" />
 
-    <com.baidu.mapapi.map.MapView
-        android:id="@+id/map"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1">
+
+        <com.baidu.mapapi.map.MapView
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <CheckBox
+            android:id="@+id/cb"
+            style="@style/CheckGPSStyle"
+            android:layout_alignParentRight="true"
+            android:layout_margin="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -31,12 +45,11 @@
 
                 <TextView
                     android:id="@+id/tv_from_time"
-                    android:layout_weight="1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="10dp"
+                    android:layout_weight="1"
                     android:gravity="center"
-                    android:text="2017-7-14 \n 00:00:14 "
                     android:textSize="14sp" />
 
                 <ImageButton
@@ -47,12 +60,11 @@
 
                 <TextView
                     android:id="@+id/tv_end_time"
-                    android:layout_weight="1"
-                    android:gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="10dp"
-                    android:text="2017-7-14 \n 00:00:14 "
+                    android:layout_weight="1"
+                    android:gravity="center"
                     android:textSize="14sp" />
 
             </LinearLayout>
@@ -60,13 +72,13 @@
             <FrameLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="10dp"
-                android:layout_marginTop="5dp"
+                android:layout_alignParentRight="true"
                 android:layout_marginBottom="5dp"
-                android:layout_alignParentRight="true">
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="5dp">
 
                 <ImageButton
-                    android:id="@+id/iv_cur_speed"
+                    android:id="@+id/ivKm"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -74,11 +86,10 @@
                     android:src="@drawable/pic_km_bg" />
 
                 <TextView
-                    android:id="@+id/tv_cur_speed"
+                    android:id="@+id/tv_km"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:text="92.1\n Km"
                     android:textColor="@color/white"
                     android:textSize="16sp" />
 

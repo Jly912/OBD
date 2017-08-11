@@ -16,13 +16,11 @@ import com.yw.obd.R;
 import com.yw.obd.base.BaseActivity;
 import com.yw.obd.entity.LoginInfo;
 import com.yw.obd.entity.TimerCount;
-import com.yw.obd.http.WebService;
+import com.yw.obd.http.Http;
 import com.yw.obd.util.AppData;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.HashMap;
 
 import butterknife.Bind;
 import butterknife.OnClick;
@@ -31,7 +29,7 @@ import butterknife.OnClick;
  * Created by apollo on 2017/7/26.
  */
 
-public class RegisterActivity extends BaseActivity implements WebService.WebServiceListener {
+public class RegisterActivity extends BaseActivity {
     @Bind(R.id.iv_back)
     ImageButton ivBack;
     @Bind(R.id.tv_title)
@@ -48,9 +46,6 @@ public class RegisterActivity extends BaseActivity implements WebService.WebServ
     EditText etPwd2;
     @Bind(R.id.btn_next)
     Button btnNext;
-    private static final int REGISTER = 1;
-    private static final int SEND_CODE = 2;
-    private static final String KEY = "20170801CHLOBDYW028M";
     private TextWatcher textWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -125,7 +120,32 @@ public class RegisterActivity extends BaseActivity implements WebService.WebServ
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tv_send_code:
-                sendCode(etPhone.getText().toString().trim());
+                Http.sendSMSCode(this, etPhone.getText().toString().trim(), new Http.OnListener() {
+                    @Override
+                    public void onSucc(Object object) {
+                        String res = (String) object;
+                        try {
+                            int state = Integer.parseInt(new JSONObject(res).getString("state"));
+                            switch (state) {
+                                case 0:
+                                    AppData.showToast(RegisterActivity.this, R.string.send_failed);
+                                    break;
+                                case 1:
+                                    AppData.showToast(RegisterActivity.this, R.string.send_succ);
+                                    timerCount.start();
+                                    break;
+                                case 2:
+                                    AppData.showToast(RegisterActivity.this, R.string.over_limit);
+                                    break;
+                                case 3:
+                                    AppData.showToast(RegisterActivity.this, R.string.sms_send_frequency);
+                                    break;
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
                 break;
             case R.id.btn_next:
                 String phone = etPhone.getText().toString().trim();
@@ -146,72 +166,34 @@ public class RegisterActivity extends BaseActivity implements WebService.WebServ
     }
 
     private void register(String phone, String pwd, String code) {
-        WebService web = new WebService(this, REGISTER, false, "Register");
-        HashMap<String, Object> property = new HashMap<>();
-        property.put("key", KEY);
-        property.put("loginName", phone);
-        property.put("password", pwd);
-        property.put("code", code);
-        property.put("phoneType", 1);
-        property.put("loginAPP", "JJG");
-        property.put("appID", "");
-        web.addWebServiceListener(this);
-        web.SyncGet(property);
-    }
-
-    private void sendCode(String phone) {
-        WebService web = new WebService(this, SEND_CODE, false, "SendSMSCode");
-        HashMap<String, Object> property = new HashMap<>();
-        property.put("key", KEY);
-        property.put("loginName", phone);
-        property.put("typeID", 0);
-        web.addWebServiceListener(this);
-        web.SyncGet(property);
-    }
-
-
-    @Override
-    public void onWebServiceReceive(String method, int id, String result) {
-        switch (id) {
-            case REGISTER:
+        Http.register(this, phone, pwd, code, new Http.OnListener() {
+            @Override
+            public void onSucc(Object object) {
+                String res = (String) object;
                 try {
-                    JSONObject jo = new JSONObject(result);
+                    JSONObject jo = new JSONObject(res);
                     int state = Integer.parseInt(jo.getString("state"));
                     if (state == 0) {
-                        LoginInfo loginInfo = new Gson().fromJson(result, LoginInfo.class);
-                        AppData.showToast(this, R.string.register_succ);
-                        startActivity(new Intent(this, RegisterSuccActivity.class));
+                        LoginInfo loginInfo = new Gson().fromJson(res, LoginInfo.class);
+                        AppData.showToast(RegisterActivity.this, R.string.register_succ);
+                        startActivity(new Intent(RegisterActivity.this, RegisterSuccActivity.class));
                         finish();
                     } else if (state == 1003) {
-                        AppData.showToast(this, R.string.user_existed);
+                        AppData.showToast(RegisterActivity.this, R.string.user_existed);
                     } else if (state == 1004) {
-                        AppData.showToast(this, R.string.code_error);
+                        AppData.showToast(RegisterActivity.this, R.string.code_error);
                     } else if (state == 1005) {
-                        AppData.showToast(this, R.string.code_over_time);
+                        AppData.showToast(RegisterActivity.this, R.string.code_over_time);
                     } else {
-                        AppData.showToast(this, R.string.register_failed);
+                        AppData.showToast(RegisterActivity.this, R.string.register_failed);
                     }
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
-                break;
-            case SEND_CODE:
-                int state = Integer.parseInt(result);
-                if (state == 0) {//发送失败
-                    AppData.showToast(this, R.string.send_failed);
-                    return;
-                } else if (state == 1) {//发送成功
-                    AppData.showToast(this, R.string.send_succ);
-                    timerCount.start();
-                } else if (state == 2) {//超过限制
-                    AppData.showToast(this, R.string.over_limit);
-                } else if (state == 3) {
-                    AppData.showToast(this, R.string.sms_send_frequency);
-                }
-                break;
-        }
+            }
+        });
     }
+
 
 }

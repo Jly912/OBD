@@ -1,15 +1,29 @@
 package com.yw.obd.fragment;
 
+import android.app.AlertDialog;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.yw.obd.R;
 import com.yw.obd.base.BaseFragment;
+import com.yw.obd.entity.DeviceListInfo;
+import com.yw.obd.entity.OilInfo;
+import com.yw.obd.http.Http;
+import com.yw.obd.util.AppData;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +73,7 @@ public class FuelFragment extends BaseFragment {
 
     private int numberOfLines = 1;
     private int maxNumberOfLines = 4;
-    private int numberOfPoints = 31;
+    private int numberOfPoints = 7;
     private float[][] randomNumberTab = new float[maxNumberOfLines][numberOfPoints];
     private boolean hasAxes = true;
     private boolean hasAxesNames = true;
@@ -72,11 +86,18 @@ public class FuelFragment extends BaseFragment {
     private boolean hasLabelForSelected = false;
     private boolean pointsHaveDifferentColor = false;
 
-    private  List<Float> data ;
-    private List<Map<String,Object>> spData;
-    private String[] names = { "大众·CC", "大众·CA", "大众·BB", "大众·CB", "大众·DD", "大众·EE", "大众·FF", "大众·GG" };
+    private DeviceListInfo deviceListInfo;
+    private List<Float> data;
+    private List<Map<String, Object>> spData;
+    private String selectDeviceName = "";
+    private AlertDialog loadingDia;
+    private OilInfo oilInfo;
 
-    private String[] numbers = { "粤B·6666",  "粤B·6677",  "粤B·7788",  "粤B·8899",  "粤B·8800",  "粤B·9900",  "粤B·1122",  "粤B·1212" };
+
+    public static FuelFragment getInstance() {
+        FuelFragment fuelFragment = new FuelFragment();
+        return fuelFragment;
+    }
 
     @Override
     protected int getLayoutId() {
@@ -85,49 +106,145 @@ public class FuelFragment extends BaseFragment {
 
     @Override
     protected void initView(View view) {
+        View inflate = LayoutInflater.from(getActivity()).inflate(R.layout.progressdialog, null);
+        loadingDia = new AlertDialog.Builder(getActivity())
+                .setCancelable(false)
+                .setView(inflate)
+                .create();
+        loadingDia.show();
+
         data = new ArrayList<>();
         for (int i = 0; i < numberOfPoints; i++) {
             float value = (float) Math.random() * 50f;
             data.add(value);
         }
-        initSpanner();
-        initColumnChart();
-        initLineChart();
+        getDeviceList();
+//        initColumnChart();
+//        initLineChart();
     }
 
-    private void initSpanner(){
-        sp.setPrompt("选择车辆");
-        spData=new ArrayList<>();
-        for (int i = 0; i < names.length; i++) {
-            Map<String,Object> map=new HashMap<>();
-            map.put("name",names[i]);
-            map.put("number",numbers[i]);
+    private int selectId = 0;
+    private String deviceId = "";
+
+    private void initSpanner(final DeviceListInfo deviceListInfo, int selectDevice) {
+        sp.setPrompt(getResources().getString(R.string.select_car));
+        spData = new ArrayList<>();
+        for (int i = 0; i < deviceListInfo.getArr().size(); i++) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("name", deviceListInfo.getArr().get(i).getName());
+            map.put("number", deviceListInfo.getArr().get(i).getCarNum());
+            String deviceId1 = deviceListInfo.getArr().get(i).getId();
+            if (Integer.parseInt(deviceId1) == selectDevice) {
+                deviceId = deviceId1;
+                selectId = i;
+            }
+
             spData.add(map);
         }
 
-        SimpleAdapter adapter=new SimpleAdapter(getActivity(),spData,R.layout.layout_spinner,new String[]{"name","number"},
-                new int[]{R.id.tv_car,R.id.tv_car_number});
+        Log.e("print", "Fuel----" + AppData.GetInstance(getActivity()).getSelectedDevice() + "______" + deviceId);
+        SimpleAdapter adapter = new SimpleAdapter(getActivity(), spData, R.layout.layout_spinner, new String[]{"name", "number"},
+                new int[]{R.id.tv_car, R.id.tv_car_number});
         sp.setAdapter(adapter);
+        sp.setSelection(selectId);
+        sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Log.d("print", "position" + position);
+                String device_id = deviceListInfo.getArr().get(position).getId();
+                selectDeviceName = deviceListInfo.getArr().get(position).getName();
+                AppData.GetInstance(getActivity()).setSelectedDevice(Integer.parseInt(device_id));
+                getOil(deviceListInfo.getArr().get(position).getId());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
 
-    private void initColumnChart() {
-        List<Integer> xValues = new ArrayList<>();//横坐标值
+    private void getDeviceList() {
+        if (loadingDia != null && loadingDia.isShowing()) {
+            loadingDia.dismiss();
+        }
+        Http.getDeviceList(getActivity(), new Http.OnListener() {
+            @Override
+            public void onSucc(Object object) {
+                String res = (String) object;
+                try {
+                    JSONObject jsonObject = new JSONObject(res);
+                    int state = Integer.parseInt(jsonObject.getString("state"));
+                    switch (state) {
+                        case 0:
+                            deviceListInfo = new Gson().fromJson(res, DeviceListInfo.class);
+                            initSpanner(deviceListInfo, AppData.GetInstance(getActivity()).getSelectedDevice());
+                            break;
+                        case 2002:
+                            AppData.showToast(getActivity(), R.string.no_msg);
+                            break;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
 
+    private List<Float> dayOils = new ArrayList<>();
+
+    private void getOil(String deviceId) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Http.getCarOil(getActivity(), sdf.format(new Date(System.currentTimeMillis())), deviceId, new Http.OnListener() {
+            @Override
+            public void onSucc(Object object) {
+                String res = (String) object;
+                try {
+                    int state = Integer.parseInt(new JSONObject(res).getString("state"));
+                    switch (state) {
+                        case 0:
+                            oilInfo = new Gson().fromJson(res, OilInfo.class);
+                            String oiLday1 = oilInfo.getOILday1();
+                            String oiLday2 = oilInfo.getOILday2();
+                            String oiLday3 = oilInfo.getOILday3();
+                            String oiLday4 = oilInfo.getOILday4();
+                            String oiLday5 = oilInfo.getOILday5();
+                            String oiLday6 = oilInfo.getOILday6();
+                            String oiLday7 = oilInfo.getOILday7();
+                            dayOils.clear();
+                            dayOils.add(Float.parseFloat(oiLday1));
+                            dayOils.add(Float.parseFloat(oiLday2));
+                            dayOils.add(Float.parseFloat(oiLday3));
+                            dayOils.add(Float.parseFloat(oiLday4));
+                            dayOils.add(Float.parseFloat(oiLday5));
+                            dayOils.add(Float.parseFloat(oiLday6));
+                            dayOils.add(Float.parseFloat(oiLday7));
+                            initColumnChart(dayOils);
+                            break;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private void initColumnChart(List<Float> data) {
+        List<Integer> xValues = new ArrayList<>();//横坐标值
+        Log.d("print", "data" + data);
         //柱状图相关
         List<Column> columnList = new ArrayList<>();
         List<SubcolumnValue> subcolumnValues;
         List<AxisValue> axisValues = new ArrayList<>();
 
-        for (int i = 0; i < numberOfPoints; i++) {
+        for (int i = 0; i < data.size(); i++) {
             subcolumnValues = new ArrayList<>();
-            subcolumnValues.add(new SubcolumnValue(data.get(i), ChartUtils.pickColor()));
-            xValues.add(31 - i);
+            subcolumnValues.add(new SubcolumnValue(data.get(i), ChartUtils.COLOR_BLUE));
+            xValues.add(data.size() - i);
 
             Column column = new Column(subcolumnValues);
             columnList.add(column);
             axisValues.add(new AxisValue(i).setLabel(xValues.get(i) + ""));
-
-
         }
         columnChartData = new ColumnChartData(columnList);
 
@@ -201,6 +318,13 @@ public class FuelFragment extends BaseFragment {
 
         lineChartData.setBaseValue(Float.NEGATIVE_INFINITY);
         lineChart.setLineChartData(lineChartData);
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        if (!hidden) {
+            getDeviceList();
+        }
     }
 
     @OnClick({R.id.iv_drop, R.id.tv_rank, R.id.tv_detail})

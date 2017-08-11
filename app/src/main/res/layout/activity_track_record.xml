@@ -9,6 +9,7 @@
 
 
     <LinearLayout
+        android:id="@+id/ll_car"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
@@ -19,7 +20,6 @@
             android:id="@+id/tv_car"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="大众·CC"
             android:textColor="@color/tab_bg"
             android:textSize="18sp" />
 
@@ -29,7 +29,6 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
             android:layout_weight="1"
-            android:text="粤B·6666"
             android:textColor="@color/tab_bg"
             android:textSize="16sp" />
 
@@ -145,7 +144,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="2017-07-25"
             android:textColor="@color/tab_bg"
             android:textSize="16sp" />
 

@@ -1,7 +1,9 @@
 package com.yw.obd.activity;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -16,7 +18,7 @@ import com.yw.obd.R;
 import com.yw.obd.base.BaseActivity;
 import com.yw.obd.entity.DeviceInfo;
 import com.yw.obd.entity.DeviceListInfo;
-import com.yw.obd.http.WebService;
+import com.yw.obd.http.Http;
 import com.yw.obd.util.AppData;
 
 import org.json.JSONException;
@@ -35,7 +37,7 @@ import butterknife.OnClick;
  * 我的车辆
  */
 
-public class MyCarActivity extends BaseActivity implements WebService.WebServiceListener {
+public class MyCarActivity extends BaseActivity {
 
     @Bind(R.id.sp)
     Spinner sp;
@@ -71,14 +73,10 @@ public class MyCarActivity extends BaseActivity implements WebService.WebService
     TextView tvVin;
     @Bind(R.id.tv_device_sn)
     TextView tvDeviceSn;
-
-    private static final int GET_DEVICE_LIST = 1;
-    private static final int GET_DEVICE = 2;
-    private static final String KEY = "20170801CHLOBDYW028M";
-
     private List<Map<String, Object>> spData;
     private int selectPosition = 0;
     private DeviceListInfo deviceListInfo;
+    private AlertDialog loadingDia = null;
 
     @Override
     protected int getLayoutId() {
@@ -87,10 +85,16 @@ public class MyCarActivity extends BaseActivity implements WebService.WebService
 
     @Override
     protected void init() {
+        View inflate = LayoutInflater.from(this).inflate(R.layout.progressdialog, null);
+        loadingDia = new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setView(inflate)
+                .create();
+        loadingDia.show();
         getDeviceList();
     }
 
-    @OnClick({R.id.iv_left, R.id.iv_right, R.id.btn_add_car})
+    @OnClick({R.id.iv_left, R.id.iv_right, R.id.btn_add_car, R.id.iv_back})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.iv_left:
@@ -119,7 +123,9 @@ public class MyCarActivity extends BaseActivity implements WebService.WebService
             case R.id.btn_add_car:
                 startActivity(new Intent(this, AddCarActivity.class));
                 break;
-
+            case R.id.iv_back:
+                finish();
+                break;
         }
     }
 
@@ -148,6 +154,7 @@ public class MyCarActivity extends BaseActivity implements WebService.WebService
                 selectPosition = position;
                 tvCarNum.setText(deviceListInfo.getArr().get(position).getCarNum());
                 String device_id = deviceListInfo.getArr().get(position).getId();
+                loadingDia.show();
                 getDevice(device_id);
                 AppData.GetInstance(MyCarActivity.this).setSelectedDevice(Integer.parseInt(device_id));
             }
@@ -160,62 +167,54 @@ public class MyCarActivity extends BaseActivity implements WebService.WebService
     }
 
     private void getDeviceList() {
-        WebService web = new WebService(this, GET_DEVICE_LIST, false, "GetDeviceList");
-        HashMap<String, Object> property = new HashMap<>();
-        property.put("key", KEY);
-        property.put("loginName", AppData.GetInstance(this).getUserName());
-        property.put("password", AppData.GetInstance(this).getUserPass());
-        web.addWebServiceListener(this);
-        web.SyncGet(property);
+        if (loadingDia != null && loadingDia.isShowing()) {
+            loadingDia.dismiss();
+        }
+        Http.getDeviceList(this, new Http.OnListener() {
+            @Override
+            public void onSucc(Object object) {
+                String res = (String) object;
+                try {
+                    int state = Integer.parseInt(new JSONObject(res).getString("state"));
+                    switch (state) {
+                        case 0:
+                            deviceListInfo = new Gson().fromJson(res, DeviceListInfo.class);
+                            initSpanner(deviceListInfo);
+                            int selectedDevice = AppData.GetInstance(MyCarActivity.this).getSelectedDevice();
+                            for (int i = 0; i < deviceListInfo.getArr().size(); i++) {
+                                String deviceId = deviceListInfo.getArr().get(i).getId();
+                                if (Integer.parseInt(deviceId) == selectedDevice) {
+                                    sp.setSelection(i);
+                                    tvCarNum.setText(deviceListInfo.getArr().get(i).getCarNum());
+                                    getDevice(deviceId);
+                                }
+
+                            }
+                            break;
+                        case 2002://没有查询到任何设备
+                            AppData.showToast(MyCarActivity.this, R.string.no_msg);
+                            break;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     private void getDevice(String id) {
-        WebService web = new WebService(this, GET_DEVICE, false, "GetDeviceDetail");
-        HashMap<String, Object> property = new HashMap<>();
-        property.put("key", KEY);
-        property.put("loginName", AppData.GetInstance(this).getUserName());
-        property.put("password", AppData.GetInstance(this).getUserPass());
-        property.put("deviceID", id);
-        web.addWebServiceListener(this);
-        web.SyncGet(property);
-    }
-
-    int state = 0x001;
-
-    @Override
-    public void onWebServiceReceive(String method, int id, String result) {
-        try {
-            JSONObject jsonObject = new JSONObject(result);
-            state = Integer.parseInt(jsonObject.getString("state"));
-        } catch (JSONException e) {
-            e.printStackTrace();
+        if (loadingDia != null && loadingDia.isShowing()) {
+            loadingDia.dismiss();
         }
-
-        if (id == GET_DEVICE_LIST) {
-            switch (state) {
-                case 0://查询成功
-                    deviceListInfo = new Gson().fromJson(result, DeviceListInfo.class);
-                    initSpanner(deviceListInfo);
-                    int selectedDevice = AppData.GetInstance(this).getSelectedDevice();
-                    for (int i = 0; i < deviceListInfo.getArr().size(); i++) {
-                        String deviceId = deviceListInfo.getArr().get(i).getId();
-                        if (Integer.parseInt(deviceId) == selectedDevice) {
-                            sp.setSelection(i);
-                            tvCarNum.setText(deviceListInfo.getArr().get(i).getCarNum());
-                            getDevice(deviceId);
-                        }
-
-                    }
-                    break;
-                case 2002://没有查询到任何设备
-                    break;
-            }
-
-
-        } else if (id == GET_DEVICE) {
-            switch (state) {
-                case 0:
-                    DeviceInfo deviceInfo = new Gson().fromJson(result, DeviceInfo.class);
+        Http.getDeviceDetail(this, id, new Http.OnListener() {
+            @Override
+            public void onSucc(Object object) {
+                String res = (String) object;
+                try {
+                    int state = Integer.parseInt(new JSONObject(res).getString("state"));
+                    switch (state) {
+                        case 0:
+                            DeviceInfo deviceInfo = new Gson().fromJson(res, DeviceInfo.class);
 //                    String info = "车牌号：" + deviceInfo.getCarNum() + "\n" + "车辆品牌：" + deviceInfo.getCarBrand() + "\n"
 //                            + "车辆型号：" + deviceInfo.getCarModel() + "\n"
 //                            + "车辆年限：" + deviceInfo.getCarYear() + "\n"
@@ -224,24 +223,27 @@ public class MyCarActivity extends BaseActivity implements WebService.WebService
 //                            + "仪表盘里程：" + deviceInfo.getCarDis() + "\n"
 //                            + "VIN：" + deviceInfo.getCarVIN() + "\n"
 //                            + "设备IMEI号：" + deviceInfo.getSn() + "\n";
-                    tvCarNum2.setText(deviceInfo.getCarNum());
-                    tvCarBrand.setText(deviceInfo.getCarBrand());
-                    tvCarType.setText(deviceInfo.getCarModel());
-                    tvModelYear.setText(deviceInfo.getCarYear());
-                    tvKm.setText(deviceInfo.getCarDis() + "KM");
-                    tvGearCase.setText(deviceInfo.getCarGBox());
-                    tvDisplacement.setText(deviceInfo.getCarOutput() + "L/T");
-                    tvVin.setText(deviceInfo.getCarVIN());
-                    tvDeviceSn.setText(deviceInfo.getSn());
-                    sp.setSelection(selectPosition);
-                    tvCarNum.setText(deviceInfo.getCarNum());
-                    break;
-                case 1009://没有权限
-                    break;
+                            tvCarNum2.setText(deviceInfo.getCarNum());
+                            tvCarBrand.setText(deviceInfo.getCarBrand());
+                            tvCarType.setText(deviceInfo.getCarModel());
+                            tvModelYear.setText(deviceInfo.getCarYear());
+                            tvKm.setText(deviceInfo.getCarDis() + "KM");
+                            tvGearCase.setText(deviceInfo.getCarGBox());
+                            tvDisplacement.setText(deviceInfo.getCarOutput() + "L/T");
+                            tvVin.setText(deviceInfo.getCarVIN());
+                            tvDeviceSn.setText(deviceInfo.getSn());
+                            sp.setSelection(selectPosition);
+                            tvCarNum.setText(deviceInfo.getCarNum());
+                            break;
+                        case 1009://没有权限
+                            break;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
-        }
+        });
     }
-
 
     @Override
     protected void onResume() {
