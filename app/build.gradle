@@ -52,6 +52,5 @@ dependencies {
     compile 'com.github.lecho:hellocharts-android:v1.5.8'
     compile 'de.hdodenhof:circleimageview:2.1.0'
     compile files('libs/ksoap2-android-assembly-2.6.0-jar-with-dependencies.jar')
-
-
+    compile 'com.github.PhilJay:MPAndroidChart:v3.0.2'
 }

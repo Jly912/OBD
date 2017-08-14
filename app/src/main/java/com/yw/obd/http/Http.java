@@ -1,6 +1,7 @@
 package com.yw.obd.http;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.yw.obd.util.AppData;
 
@@ -39,6 +40,7 @@ public class Http {
      * @param listener
      */
     public static void getLogin(Context context, String loginName, String pwd, final OnListener listener) {
+        Log.e("print", "---getLogin-" + loginName + "----" + pwd);
         WebService web = new WebService(context, LOGIN, false, "Login");
         HashMap<String, Object> property = new HashMap<>();
         property.put("key", KEY);

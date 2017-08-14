@@ -18,4 +18,7 @@
 
     <color name="orange">#FFCD41</color>
     <color name="bg_gray1">#F4F6F9</color>
+    <color name="bar_blue">#33B5E5</color>
+    <color name="orange1">#FFBB33</color>
+    <color name="green">#99CC00</color>
 </resources>

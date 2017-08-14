@@ -183,4 +183,11 @@
     <string name="checkCar">汽车检测</string>
     <string name="checking">正在检测，请稍候...</string>
     <string name="check_succ">检测完成...</string>
+
+    <string name="this_week">本周</string>
+    <string name="last_week">上周</string>
+    <string name="l_last_week">上上周</string>
+    <string name="ll_last_week">上上上周</string>
+    <string name="month">月</string>
+    <string name="no_data">没有数据</string>
 </resources>

@@ -92,7 +92,7 @@ public class LoginActivity extends BaseActivity {
                                     AppData.GetInstance(LoginActivity.this).setTimeZone(loginInfo.getInfo().getTimeZone());
                                     AppData.GetInstance(LoginActivity.this).setUserId(Integer.parseInt(loginInfo.getInfo().getUserID()));
                                     AppData.GetInstance(LoginActivity.this).setLoginRemember(cb.isChecked());
-                                    AppData.GetInstance(LoginActivity.this).setUserPass(cb.isChecked() ? etPwd.getText().toString().trim() : "");
+                                    AppData.GetInstance(LoginActivity.this).setUserPass(etPwd.getText().toString().trim());
                                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                                     finish();
                                     break;
