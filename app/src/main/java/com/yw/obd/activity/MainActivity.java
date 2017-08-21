@@ -1,6 +1,9 @@
 package com.yw.obd.activity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.support.annotation.IdRes;
+import android.view.KeyEvent;
 import android.widget.FrameLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -84,5 +87,28 @@ public class MainActivity extends BaseActivity implements RadioGroup.OnCheckedCh
                 showFragment(R.id.fl_zw, mineFragment);
                 break;
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.app_name)
+                    .setMessage(R.string.sure_exit)
+                    .setPositiveButton(R.string.submit, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            MainActivity.this.finish();
+                        }
+                    }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            }).show();
+            return true;
+        }
+        return true;
     }
 }

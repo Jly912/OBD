@@ -29,6 +29,14 @@ public class Http {
     private static final int GET_TRACK_LIST = 0x004;
     private static final int GET_DEVICE_TRACKING = 0x005;
     private static final int GET_DEVICE = 0x006;
+    private static final int GET_WARN_LIST = 0x007;
+    private static final int GET_NEW_WARN = 0x008;
+    private static final int DEL_WARN_MSG = 0x009;
+    private static final int SEND_COMMAND = 0x010;
+    private static final int GET_HOME_DATA = 0x011;
+    private static final int GET_DETAIL_OIL = 0x012;
+    private static final int UPDATE_PWD = 0x013;
+    private static final int FORGET_PWD = 0x014;
     private static final String KEY = "20170801CHLOBDYW028M";
 
     /**
@@ -98,12 +106,65 @@ public class Http {
      * @param loginName
      * @param listener
      */
-    public static void sendSMSCode(Context context, String loginName, final OnListener listener) {
+    public static void sendSMSCode(Context context, String loginName,int type, final OnListener listener) {
         WebService web = new WebService(context, SEND_CODE, false, "SendSMSCode");
         HashMap<String, Object> property = new HashMap<>();
         property.put("key", KEY);
         property.put("loginName", loginName);
-        property.put("typeID", 0);
+        property.put("typeID", type);
+        web.addWebServiceListener(new WebService.WebServiceListener() {
+            @Override
+            public void onWebServiceReceive(String method, int id, String result) {
+                if (listener != null) {
+                    listener.onSucc(result);
+                }
+            }
+        });
+        web.SyncGet(property);
+    }
+
+    /**
+     * 修改密码
+     *
+     * @param context
+     * @param pwd
+     * @param newPwd
+     * @param listener
+     */
+    public static void updatePwd(Context context, String pwd, String newPwd, final OnListener listener) {
+        WebService web = new WebService(context, UPDATE_PWD, false, "UpdateUserPassword");
+        HashMap<String, Object> property = new HashMap<>();
+        property.put("loginName", AppData.GetInstance(context).getUserName());
+        property.put("password", pwd);
+        property.put("newPassword", newPwd);
+        property.put("key", KEY);
+        web.addWebServiceListener(new WebService.WebServiceListener() {
+            @Override
+            public void onWebServiceReceive(String method, int id, String result) {
+                if (listener != null) {
+                    listener.onSucc(result);
+                }
+            }
+        });
+        web.SyncGet(property);
+    }
+
+    /**
+     * 忘记密码接口
+     *
+     * @param context
+     * @param tel
+     * @param pwd
+     * @param code
+     * @param listener
+     */
+    public static void forgetPwd(Context context, String tel, String pwd, String code, final OnListener listener) {
+        WebService web = new WebService(context, UPDATE_PWD, false, "ForgotPassword");
+        HashMap<String, Object> property = new HashMap<>();
+        property.put("loginName", tel);
+        property.put("password", pwd);
+        property.put("code", code);
+        property.put("key", KEY);
         web.addWebServiceListener(new WebService.WebServiceListener() {
             @Override
             public void onWebServiceReceive(String method, int id, String result) {
@@ -152,6 +213,32 @@ public class Http {
         property.put("loginName", AppData.GetInstance(context).getUserName());
         property.put("password", AppData.GetInstance(context).getUserPass());
         property.put("deviceID", deviceId);
+        web.addWebServiceListener(new WebService.WebServiceListener() {
+            @Override
+            public void onWebServiceReceive(String method, int id, String result) {
+                if (listener != null) {
+                    listener.onSucc(result);
+                }
+            }
+        });
+        web.SyncGet(property);
+    }
+
+    /**
+     * 获得主页设备信息
+     *
+     * @param context
+     * @param deviceID
+     * @param listener
+     */
+    public static void getHomeData(Context context, String deviceID, final OnListener listener) {
+        WebService web = new WebService(context, GET_HOME_DATA, false, "GetHomeData");
+        HashMap<String, Object> property = new HashMap<>();
+        property.put("key", KEY);
+        property.put("loginName", AppData.GetInstance(context).getUserName());
+        property.put("password", AppData.GetInstance(context).getUserPass());
+        property.put("timeZones", AppData.GetInstance(context).getTimeZone());
+        property.put("deviceID", deviceID);
         web.addWebServiceListener(new WebService.WebServiceListener() {
             @Override
             public void onWebServiceReceive(String method, int id, String result) {
@@ -458,6 +545,156 @@ public class Http {
             }
         });
 
+        web.SyncGet(property);
+    }
+
+    /**
+     * 获得报警信息
+     *
+     * @param context
+     * @param pageNo
+     * @param listener
+     */
+    public static void getWarnList(Context context, int pageNo, String deviceId, final OnListener listener) {
+        WebService web = new WebService(context, GET_WARN_LIST, false, "GetWarnList");
+        HashMap<String, Object> property = new HashMap<>();
+        property.put("key", KEY);
+        property.put("loginName", AppData.GetInstance(context).getUserName());
+        property.put("password", AppData.GetInstance(context).getUserPass());
+        property.put("PageNo", pageNo);// PageNo 类型int,查询页
+        property.put("PageCount", 30);// PageCount 类型int,每页显示数
+        property.put("deviceID", deviceId);
+        property.put("TimeZones", AppData.GetInstance(context).getTimeZone());
+        property.put("Language", Locale.getDefault().getLanguage());
+        Log.e("print", "-----property--" + property);
+        web.addWebServiceListener(new WebService.WebServiceListener() {
+            @Override
+            public void onWebServiceReceive(String method, int id, String result) {
+                if (listener != null) {
+                    listener.onSucc(result);
+                }
+            }
+        });
+        web.SyncGet(property);
+    }
+
+    /**
+     * 获得新的报警通知
+     *
+     * @param context
+     * @param lastId
+     * @param listener
+     */
+    public static void getNewWarn(Context context, String lastId, final OnListener listener) {
+        WebService web = new WebService(context, GET_NEW_WARN, false, "GetNewWarn");
+        HashMap<String, Object> property = new HashMap<>();
+        property.put("loginName", AppData.GetInstance(context).getUserName());
+        property.put("password", AppData.GetInstance(context).getUserPass());
+        property.put("key", KEY);
+        property.put("deviceID", AppData.GetInstance(context).getSelectedDevice());
+        property.put("LastID", lastId);
+        property.put("TimeZones", AppData.GetInstance(context).getTimeZone());
+        property.put("Language", Locale.getDefault().getLanguage());
+        Log.e("print", "-----" + property);
+        web.addWebServiceListener(new WebService.WebServiceListener() {
+            @Override
+            public void onWebServiceReceive(String method, int id, String result) {
+                if (listener != null) {
+                    listener.onSucc(result);
+                }
+            }
+        });
+        web.SyncGet(property);
+    }
+
+    /**
+     * 删除报警信息
+     *
+     * @param context
+     * @param deviceID
+     * @param msgID
+     * @param listener
+     */
+    public static void deleteMsg(Context context, String deviceID, String msgID, final OnListener listener) {
+        WebService web = new WebService(context, DEL_WARN_MSG, false, "ClearExceptionMessageByID");
+        HashMap<String, Object> property = new HashMap<>();
+        property.put("loginName", AppData.GetInstance(context).getUserName());
+        property.put("password", AppData.GetInstance(context).getUserPass());
+        property.put("key", KEY);
+        property.put("deviceID", deviceID);
+        property.put("ExceptionID", msgID);
+        web.addWebServiceListener(new WebService.WebServiceListener() {
+            @Override
+            public void onWebServiceReceive(String method, int id, String result) {
+                if (listener != null) {
+                    listener.onSucc(result);
+                }
+            }
+        });
+        web.SyncGet(property);
+    }
+
+    /**
+     * 发送命令
+     *
+     * @param context
+     * @param sn
+     * @param deviceId
+     * @param commandType
+     * @param model
+     * @param paramter
+     * @param listener
+     */
+    public static void sendCommand(Context context, String sn, String deviceId, String commandType, String model, String paramter, final OnListener listener) {
+        WebService web = new WebService(context, SEND_COMMAND, false, "SendCommandByAPP");
+        HashMap<String, Object> property = new HashMap<>();
+        property.put("loginName", AppData.GetInstance(context).getUserName());
+        property.put("password", AppData.GetInstance(context).getUserPass());
+        property.put("Key", KEY);
+        property.put("DeviceID", deviceId);
+        property.put("CommandType", commandType);
+        property.put("Model", model);
+        property.put("Paramter", paramter);
+        property.put("SN", sn);
+        web.addWebServiceListener(new WebService.WebServiceListener() {
+            @Override
+            public void onWebServiceReceive(String method, int id, String result) {
+                if (listener != null) {
+                    listener.onSucc(result);
+                }
+            }
+        });
+        web.SyncGet(property);
+    }
+
+    /**
+     * 获得油耗详情
+     *
+     * @param context
+     * @param deviceId
+     * @param interval 为1、2、3分别表示日、周、月
+     * @param dateStr  日，格式为yyyy-MM-dd，周，格式为yyyy-MM-dd|yyyy-MM-dd，月，格式为yyyy-MM
+     * @param listener
+     */
+    public static void getOilDetail(Context context, String deviceId, int interval, String dateStr, final OnListener listener) {
+        WebService web = new WebService(context, GET_DETAIL_OIL, false, "GetCarStatistics");
+        HashMap<String, Object> property = new HashMap<>();
+        property.put("loginName", AppData.GetInstance(context).getUserName());
+        property.put("password", AppData.GetInstance(context).getUserPass());
+        property.put("key", KEY);
+        property.put("deviceID", deviceId);
+        property.put("dateStr", dateStr);
+        property.put("timeZones", AppData.GetInstance(context).getTimeZone());
+        property.put("interval", interval);
+        Log.e("print", "getoilDetail" + property);
+        web.addWebServiceListener(new WebService.WebServiceListener() {
+            @Override
+            public void onWebServiceReceive(String method, int id, String result) {
+                if (listener != null) {
+                    listener.onSucc(result);
+                }
+            }
+        });
         web.SyncGet(property);
     }
 

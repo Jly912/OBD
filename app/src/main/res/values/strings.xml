@@ -3,6 +3,7 @@
     <string name="login">登录</string>
     <string name="remember_pwd">记住密码</string>
     <string name="forget_pwd">忘记密码？</string>
+    <string name="forget">忘记密码</string>
     <string name="login_user_hint">请输入用户名...</string>
     <string name="login_pwd_hint">请输入密码...</string>
     <string name="login_experience">我要体验</string>
@@ -54,6 +55,7 @@
     <string name="normal_question">常见问题</string>
     <string name="alter_pwd">修改密码</string>
     <string name="about_app">关于APP</string>
+    <string name="about">关于</string>
     <string name="feedback">意见反馈</string>
 
     <string name="time">时间</string>
@@ -104,6 +106,7 @@
     <string name="code_error">验证码错误</string>
     <string name="register_succ">注册成功</string>
     <string name="register_failed">注册失败</string>
+    <string name="alter_succ">恭喜您！修改成功</string>
     <string name="congratulation_succ">恭喜您！注册成功！</string>
     <string name="login_at_once">立即登录</string>
     <string name="user_existed">手机号已注册</string>
@@ -161,6 +164,7 @@
     <string name="refuse_enter">访问被拒绝！</string>
     <string name="waring">注意</string>
     <string name="waring_start_time_is_after_end">开始时间比结束时间更大</string>
+    <string name="end_time_before_start_time">结束时间不能小于开始时间</string>
     <string name="waring_time">请搜索一天范围内的历史轨迹</string>
     <string name="confirm">确认</string>
     <string name="current_oil_price">实时油价</string>
@@ -190,4 +194,31 @@
     <string name="ll_last_week">上上上周</string>
     <string name="month">月</string>
     <string name="no_data">没有数据</string>
+    <string name="coefficient">系数</string>
+    <string name="alarm_msg">报警消息</string>
+    <string name="promote">提示</string>
+    <string name="del_msg">你确定要删除这条报警信息吗？</string>
+    <string name="del_succ">删除成功</string>
+    <string name="del_failed">删除失败</string>
+    <string name="sure_exit">你确定要退出洁节高吗？</string>
+    <string name="app_code">版本号：</string>
+    <string name="company_name">北京华益蓝天环保科技有限责任公司</string>
+    <string name="desc">\u3000\u3000此版本适用于Android4.5及4.5以上版本手机，软件的下载及使用过程中产生的流量费，由运营商收取。</string>
+    <string name="feedback_qq">反馈QQ</string>
+    <string name="feedback_tel">反馈电话</string>
+
+    <string name="oil_spend">油耗量(L)</string>
+    <string name="day_ref_oil_feed">本日参考油费(元)</string>
+    <string name="week_ref_oil_feed">本周参考油费(元)</string>
+    <string name="month_ref_oil_feed">本月参考油费(元)</string>
+    <string name="ave_oil">平均油耗(L)</string>
+    <string name="ave_co">平均碳排放(g)</string>
+    <string name="dis">里程</string>
+    <string name="day_data">日数据</string>
+    <string name="week_data">周数据</string>
+    <string name="month_data">月数据</string>
+    <string name="beyond_date">你选择的查询时间已经超过当前时间范围</string>
+    <string name="hint_original_pwd">请输入旧密码...</string>
+    <string name="submit_alter">确认修改</string>
+    <string name="add_device_first">请先添加设备</string>
 </resources>

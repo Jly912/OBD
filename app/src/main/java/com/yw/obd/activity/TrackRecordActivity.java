@@ -2,10 +2,12 @@ package com.yw.obd.activity;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -87,8 +89,8 @@ public class TrackRecordActivity extends BaseActivity {
     private Date startTime;
     private Date endTime;
     private List<TrackListInfo.ArrBean> arr;
-    private AlertDialog loadingDia = null;
     private String date;
+    private Dialog loadingDia;
 
     @Override
     protected int getLayoutId() {
@@ -121,7 +123,7 @@ public class TrackRecordActivity extends BaseActivity {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (adapter.getData().size() != 0) {
+                if (adapter.getData().size() != 0 && position != adapter.getCount() - 1) {
                     Intent intent = new Intent(TrackRecordActivity.this, LocusActivity.class);
                     String startTime = arr.get(position).getStartTime();
                     String endTime = arr.get(position).getEndTime();
@@ -157,7 +159,7 @@ public class TrackRecordActivity extends BaseActivity {
                     refreshLayout.setRefreshing(false);
                 }
 
-                if (loadingDia != null && loadingDia.isShowing()) {
+                if (loadingDia != null & loadingDia.isShowing()) {
                     loadingDia.dismiss();
                 }
                 String res = (String) object;
@@ -233,6 +235,10 @@ public class TrackRecordActivity extends BaseActivity {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.iv_back:
+                if (loadingDia != null) {
+                    loadingDia.dismiss();
+                    loadingDia = null;
+                }
                 finish();
                 break;
             case R.id.ll_car:
@@ -269,7 +275,18 @@ public class TrackRecordActivity extends BaseActivity {
                                 startCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
                                 startCalendar.set(Calendar.MINUTE, minute);
                                 startTime = startCalendar.getTime();
-                                tvStartTime.setText(sdftime.format(startTime));
+                                Log.e("print", "startTime" + startTime + "----" + endTime);
+                                if (startTime != null) {
+                                    if (endTime != null) {
+                                        if (startTime.after(endTime)) {
+                                            AppData.showToast(TrackRecordActivity.this, R.string.waring_start_time_is_after_end);
+                                            return;
+                                        }
+                                    }
+                                    tvStartTime.setText(sdftime.format(startTime));
+                                    getTrackList();
+                                }
+
                             }
                         },
                         startCalendar.get(Calendar.HOUR_OF_DAY),
@@ -277,7 +294,6 @@ public class TrackRecordActivity extends BaseActivity {
                 dialog.show();
                 break;
             case R.id.tv_end_time:
-
                 TimePickerDialog dialog1 = new TimePickerDialog(this,
                         new TimePickerDialog.OnTimeSetListener() {
 
@@ -287,55 +303,63 @@ public class TrackRecordActivity extends BaseActivity {
                                 endCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
                                 endCalendar.set(Calendar.MINUTE, minute);
                                 endTime = endCalendar.getTime();
-                                tvEndTime.setText(sdftime.format(endTime));
+                                if (endTime != null) {
+                                    if (startTime != null) {
+                                        if (endTime.before(startTime)) {//结束时间在开始时间之前
+                                            AppData.showToast(TrackRecordActivity.this, R.string.end_time_before_start_time);
+                                            return;
+                                        }
+                                    }
+                                    tvEndTime.setText(sdftime.format(endTime));
+                                    getTrackList();
+                                }
+
+//                                if (startTime.after(endTime)) {
+//                                    new AlertDialog.Builder(TrackRecordActivity.this)
+//                                            .setTitle(R.string.waring)
+//                                            .setMessage(R.string.waring_start_time_is_after_end)
+//                                            .setOnCancelListener(new DialogInterface.OnCancelListener() {
+//                                                public void onCancel(DialogInterface dialog) {
+//                                                    dialog.dismiss();
+//                                                }
+//                                            }).setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+//                                        @Override
+//                                        public void onClick(DialogInterface dialog, int which) {
+//                                            dialog.dismiss();
+//                                        }
+//                                    }).show();
+//                                    return;
+//                                }
+//                                long diff = endTime.getTime() - startTime.getTime();
+//                                double days = (double) diff / (1000.0 * 60.0 * 60.0 * 24.0);
+//                                if (days > 1) {
+//                                    new AlertDialog.Builder(TrackRecordActivity.this)
+//                                            .setTitle(R.string.waring)
+//                                            .setMessage(R.string.waring_time)
+//                                            .setOnCancelListener(new DialogInterface.OnCancelListener() {
+//                                                public void onCancel(DialogInterface dialog) {
+//                                                    dialog.dismiss();
+//                                                }
+//                                            }).setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+//                                        @Override
+//                                        public void onClick(DialogInterface dialog, int which) {
+//                                            dialog.dismiss();
+//                                        }
+//                                    }).show();
+//                                    return;
+//                                }
+//                                getTrackList();
                             }
                         },
                         endCalendar.get(Calendar.HOUR_OF_DAY),
                         endCalendar.get(Calendar.MINUTE), true);
                 dialog1.show();
+
+
                 break;
             case R.id.tv_reset:
-                if (startTime == null || endTime == null) {
-                    getTrackList();
-                    return;
-                }
-                if (startTime.after(endTime)) {
-                    new AlertDialog.Builder(this)
-                            .setTitle(R.string.waring)
-                            .setMessage(R.string.waring_start_time_is_after_end)
-                            .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                                public void onCancel(DialogInterface dialog) {
-                                    dialog.dismiss();
-                                }
-                            }).setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    }).show();
-                    return;
-                }
-                long diff = endTime.getTime() - startTime.getTime();
-                double days = (double) diff / (1000.0 * 60.0 * 60.0 * 24.0);
-                if (days > 1) {
-                    new AlertDialog.Builder(this)
-                            .setTitle(R.string.waring)
-                            .setMessage(R.string.waring_time)
-                            .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                                public void onCancel(DialogInterface dialog) {
-                                    dialog.dismiss();
-                                }
-                            }).setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    }).show();
-
-                    return;
-
-                }
-
+                tvStartTime.setText("00:00");
+                tvEndTime.setText("23:59");
                 getTrackList();
                 break;
             case R.id.btn_left:
@@ -367,10 +391,10 @@ public class TrackRecordActivity extends BaseActivity {
 
                                 date = sdfdate.format(startTime);
                                 try {
-                                    Date d=sdfdate.parse(date);
+                                    Date d = sdfdate.parse(date);
                                     Date date = new Date(System.currentTimeMillis());
-                                    if (d.getTime()>date.getTime()){
-                                        AppData.showToast(TrackRecordActivity.this,R.string.select_before);
+                                    if (d.getTime() > date.getTime()) {
+                                        AppData.showToast(TrackRecordActivity.this, R.string.select_before);
                                         return;
                                     }
                                 } catch (ParseException e) {
@@ -378,6 +402,7 @@ public class TrackRecordActivity extends BaseActivity {
                                 }
 
                                 tvDate.setText(sdfdate.format(startTime));
+                                getTrackList();
                             }
 
                         },
@@ -390,7 +415,6 @@ public class TrackRecordActivity extends BaseActivity {
                 if (date.equals(TimeUtils.getToday())) {
                     return;
                 }
-
                 date = getDate(date, 1);
                 tvDate.setText(date);
                 getTrackList();
@@ -413,4 +437,12 @@ public class TrackRecordActivity extends BaseActivity {
         return data;
     }
 
+    @Override
+    protected void onDestroy() {
+        if (loadingDia != null) {
+            loadingDia.dismiss();
+            loadingDia = null;
+        }
+        super.onDestroy();
+    }
 }

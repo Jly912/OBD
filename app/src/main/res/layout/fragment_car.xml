@@ -7,23 +7,39 @@
     android:orientation="vertical">
 
     <RelativeLayout
+        android:id="@+id/rl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        >
+        android:gravity="center_vertical">
 
-        <Spinner
-            android:id="@+id/sp"
+        <LinearLayout
+            android:id="@+id/ll_car"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true" />
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_car"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tv_car_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/shape_gray"
+                android:textSize="14sp" />
+        </LinearLayout>
 
         <ImageButton
             android:id="@+id/iv_drop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/sp"
             android:background="@null"
             android:padding="5dp"
             android:src="@drawable/btn_dropdown_normal"

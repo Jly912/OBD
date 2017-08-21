@@ -1,34 +1,37 @@
 package com.yw.obd.fragment;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
-import android.widget.SimpleAdapter;
-import android.widget.Spinner;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.yw.obd.R;
+import com.yw.obd.activity.AlarmActivity;
 import com.yw.obd.activity.CarCheckActivity;
+import com.yw.obd.adapter.PopuLvAdapter;
 import com.yw.obd.base.BaseFragment;
-import com.yw.obd.entity.DeviceInfo;
 import com.yw.obd.entity.DeviceListInfo;
 import com.yw.obd.http.Http;
+import com.yw.obd.service.PushService;
 import com.yw.obd.util.AppData;
+import com.yw.obd.util.DensityUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.OnClick;
@@ -38,8 +41,6 @@ import butterknife.OnClick;
  */
 
 public class HomeFragment extends BaseFragment {
-    @Bind(R.id.sp)
-    Spinner sp;
     @Bind(R.id.iv_drop)
     ImageButton ivDrop;
     @Bind(R.id.iv_alarm)
@@ -52,9 +53,23 @@ public class HomeFragment extends BaseFragment {
     ImageButton ivEngine;
     @Bind(R.id.tv_co)
     TextView tvCo;
-    private List<Map<String, Object>> spData;
-    private String device_id,carName;
+    @Bind(R.id.tv_car_number)
+    TextView tvCarNum;
+    @Bind(R.id.tv_car)
+    TextView tvCarName;
+    @Bind(R.id.ll_car)
+    LinearLayout llCar;
+    @Bind(R.id.rl)
+    RelativeLayout rl;
+
+    private String device_id, carName;
     private AlertDialog loadingDia = null;
+
+    private PopupWindow popupWindow;
+    private DeviceListInfo deviceListInfo;
+    private View popu;
+    private ListView lv;
+    private PopuLvAdapter adapter;
 
     public static HomeFragment getInstance() {
         HomeFragment homeFragment = new HomeFragment();
@@ -74,84 +89,94 @@ public class HomeFragment extends BaseFragment {
                 .setCancelable(false)
                 .setView(inflate)
                 .create();
-        loadingDia.show();
 
+        popu = getActivity().getLayoutInflater().inflate(R.layout.layout_popu, null);
+        lv = (ListView) popu.findViewById(R.id.lv);
         getDeviceList();
     }
 
-    private int selectposition = 0;
-    private String deviceId = "";
-
-    private void initSpanner(final DeviceListInfo deviceListInfo, int selectDevice) {
-        sp.setPrompt(getResources().getString(R.string.select_car));
-        spData = new ArrayList<>();
-        for (int i = 0; i < deviceListInfo.getArr().size(); i++) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("name", deviceListInfo.getArr().get(i).getName());
-            map.put("number", deviceListInfo.getArr().get(i).getCarNum());
-            spData.add(map);
-
-            DeviceListInfo.ArrBean arrBean = deviceListInfo.getArr().get(i);
-            if (Integer.parseInt(arrBean.getId()) == selectDevice) {
-                selectposition = i;
-                deviceId = arrBean.getId();
-            }
-        }
-
-        Log.e("print", "Home----" + AppData.GetInstance(getActivity()).getSelectedDevice() + "______" + deviceId);
-        SimpleAdapter adapter = new SimpleAdapter(getActivity(), spData, R.layout.layout_spinner, new String[]{"name", "number"},
-                new int[]{R.id.tv_car, R.id.tv_car_number});
-        sp.setAdapter(adapter);
-        sp.setSelection(selectposition);
-
-        sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                device_id = deviceListInfo.getArr().get(position).getId();
-                carName=deviceListInfo.getArr().get(position).getName();
-                getDevice(device_id);
-                AppData.GetInstance(getActivity()).setSelectedDevice(Integer.parseInt(device_id));
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-    }
-
-    @OnClick({R.id.iv_drop, R.id.iv_alarm, R.id.iv_engine})
+    @OnClick({R.id.iv_drop, R.id.iv_alarm, R.id.iv_engine, R.id.ll_car})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.iv_drop:
                 break;
-            case R.id.iv_alarm:
+            case R.id.iv_alarm://报警消息
+                if (addDeviceFirst()) return;
+                Intent intentMSG = new Intent(getActivity(), AlarmActivity.class);
+                intentMSG.putExtra("id", device_id);
+                getActivity().startActivity(intentMSG);
                 break;
             case R.id.iv_engine://检测
+                if (addDeviceFirst()) return;
                 Intent intent = new Intent(getActivity(), CarCheckActivity.class);
                 intent.putExtra("id", device_id);
-                intent.putExtra("name",carName);
+                intent.putExtra("name", carName);
                 getActivity().startActivity(intent);
+                break;
+            case R.id.ll_car:
+                if (addDeviceFirst()) return;
+                showPopu(rl);
                 break;
         }
     }
 
-    private void getDeviceList() {
-        if (loadingDia != null && loadingDia.isShowing()) {
-            loadingDia.dismiss();
+    private boolean addDeviceFirst() {
+        if (deviceListInfo == null) {
+            AppData.showToast(getActivity(), R.string.add_device_first);
+            return true;
         }
+        return false;
+    }
+
+    private boolean isExist = false;
+
+    private void getDeviceList() {
+        loadingDia.show();
         Http.getDeviceList(getActivity(), new Http.OnListener() {
             @Override
             public void onSucc(Object object) {
                 String res = (String) object;
                 try {
-                    int state = Integer.parseInt(new JSONObject(res).getString("state"));
+                    JSONObject jsonObject = new JSONObject(res);
+                    int state = jsonObject.getInt("state");
+                    AppData.GetInstance(getActivity()).setAlarmAlert(true);
                     switch (state) {
                         case 0:
-                            DeviceListInfo deviceListInfo = new Gson().fromJson(res, DeviceListInfo.class);
-                            initSpanner(deviceListInfo, AppData.GetInstance(getActivity()).getSelectedDevice());
+                            deviceListInfo = new Gson().fromJson(res, DeviceListInfo.class);
+                            int selectedDevice = AppData.GetInstance(getActivity()).getSelectedDevice();
+                            Log.e("print", "deviceSelectID" + selectedDevice);
+                            for (int i = 0; i < deviceListInfo.getArr().size(); i++) {
+
+                                if (deviceListInfo.getArr().get(i).getId().equals(selectedDevice + "")) {
+                                    Log.e("print", "---存在--" + selectedDevice);
+                                    device_id = deviceListInfo.getArr().get(i).getId();
+                                    carName = deviceListInfo.getArr().get(i).getName();
+                                    tvCarName.setText(carName);
+                                    tvCarNum.setText(deviceListInfo.getArr().get(i).getCarNum());
+                                    isExist = true;
+                                    getHomeData(device_id);
+                                    break;
+                                }
+                            }
+
+                            if (!isExist) {
+                                Log.e("print", "---不存在--");
+                                device_id = deviceListInfo.getArr().get(0).getId();
+                                carName = deviceListInfo.getArr().get(0).getName();
+                                tvCarName.setText(carName);
+                                tvCarNum.setText(deviceListInfo.getArr().get(0).getCarNum());
+                                AppData.GetInstance(getActivity()).setSelectedDevice(Integer.parseInt(device_id));
+                                getHomeData(device_id);
+                            }
+
+                            getActivity().startService(new Intent(getActivity(), PushService.class));
+
                             break;
                         case 2002:
+                            if (loadingDia != null && loadingDia.isShowing()) {
+                                loadingDia.dismiss();
+                            }
+                            getActivity().startService(new Intent(getActivity(), PushService.class));
                             AppData.showToast(getActivity(), R.string.no_msg);
                             break;
                     }
@@ -163,18 +188,32 @@ public class HomeFragment extends BaseFragment {
 
     }
 
-    private void getDevice(String id) {
-        Http.getDeviceDetail(getActivity(), id, new Http.OnListener() {
+    private String ranking = "您当前的油耗排名击败全国%s的车主！";
+
+    private void getHomeData(String id) {
+        Http.getHomeData(getActivity(), id, new Http.OnListener() {
             @Override
             public void onSucc(Object object) {
+                if (loadingDia != null && loadingDia.isShowing()) {
+                    loadingDia.dismiss();
+                }
                 String res = (String) object;
                 try {
-                    int state = Integer.parseInt(new JSONObject(res).getString("state"));
+                    JSONObject jo = new JSONObject(res);
+                    int state = Integer.parseInt(jo.getString("state"));
                     switch (state) {
                         case 0:
-                            DeviceInfo deviceInfo = new Gson().fromJson(res, DeviceInfo.class);
+                            String tripFuel = jo.getString("tripFuel");
+                            String carbon = jo.getString("carbon");
+                            String rank = jo.getString("ranking");
+                            tvFuel.setText(tripFuel + "/L");
+                            tvCo.setText(carbon + "/g");
+                            tvRound.setText(String.format(ranking, rank));
                             break;
-                        case 1009://没有权限
+                        case 2002:
+                            tvFuel.setText(0.0 + "/L");
+                            tvCo.setText(0.0 + "/g");
+                            tvRound.setText(String.format(ranking, "0%"));
                             break;
                     }
                 } catch (JSONException e) {
@@ -184,12 +223,56 @@ public class HomeFragment extends BaseFragment {
         });
     }
 
-
     @Override
     public void onHiddenChanged(boolean hidden) {
         if (!hidden) {
             loadingDia.show();
             getDeviceList();
         }
+    }
+
+
+    private void showPopu(View parent) {
+        if (popupWindow == null) {
+            adapter = new PopuLvAdapter(getActivity(), deviceListInfo, false);
+            lv.setAdapter(adapter);
+            int width = DensityUtil.dip2px(getActivity(), 150);
+            int height = DensityUtil.dip2px(getActivity(), 150);
+            popupWindow = new PopupWindow(popu, width, height);
+        }
+
+        // 使其聚集
+        popupWindow.setFocusable(true);
+        // 设置允许在外点击消失
+        popupWindow.setOutsideTouchable(true);
+        // 这个是为了点击“返回Back”也能使其消失，并且并不会影响你的背景
+        popupWindow.setBackgroundDrawable(new BitmapDrawable());
+        WindowManager windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
+        // 显示的位置为:屏幕的宽度的一半-PopupWindow的高度的一半
+        int xPos = windowManager.getDefaultDisplay().getWidth() / 2
+                - popupWindow.getWidth() / 2;
+        Log.i("print", "xPos:" + xPos);
+
+        popupWindow.showAsDropDown(parent, xPos, 0);
+
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view,
+                                    int position, long id) {
+
+                if (popupWindow != null) {
+                    popupWindow.dismiss();
+                }
+
+                device_id = deviceListInfo.getArr().get(position).getId();
+                carName = deviceListInfo.getArr().get(position).getName();
+                tvCarName.setText(carName);
+                tvCarNum.setText(deviceListInfo.getArr().get(position).getCarNum());
+                AppData.GetInstance(getActivity()).setSelectedDevice(Integer.parseInt(device_id));
+                loadingDia.show();
+                getHomeData(device_id);
+            }
+        });
     }
 }

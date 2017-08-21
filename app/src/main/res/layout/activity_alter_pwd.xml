@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_gray"
+    android:orientation="vertical">
+
+    <include layout="@layout/layout_actionbar" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/et_original_pwd"
+            style="@style/EditTextStyle"
+            android:hint="@string/hint_original_pwd"
+            android:inputType="textPassword" />
+
+        <EditText
+            android:id="@+id/et_pwd"
+            style="@style/EditTextStyle"
+            android:hint="@string/register_pwd_hint"
+            android:inputType="textPassword" />
+
+        <EditText
+            android:id="@+id/et_pwd2"
+            style="@style/EditTextStyle"
+            android:hint="@string/register_pwd2_hint"
+            android:inputType="textPassword" />
+
+
+        <Button
+            android:id="@+id/btn_alter"
+            style="@style/ButtonStyle"
+            android:layout_centerInParent="true"
+            android:text="@string/confirm" />
+    </LinearLayout>
+
+
+</LinearLayout>

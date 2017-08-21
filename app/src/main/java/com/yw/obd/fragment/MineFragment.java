@@ -11,12 +11,17 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.yw.obd.R;
+import com.yw.obd.activity.AboutActivity;
+import com.yw.obd.activity.AlterPwdActivity;
+import com.yw.obd.activity.FeedbackActivity;
 import com.yw.obd.activity.MyCarActivity;
 import com.yw.obd.activity.OilActivity;
 import com.yw.obd.activity.PersonalActivity;
 import com.yw.obd.base.BaseFragment;
+import com.yw.obd.entity.DeviceListInfo;
 import com.yw.obd.entity.UserInfo;
 import com.yw.obd.http.Http;
+import com.yw.obd.util.AppData;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,7 +79,7 @@ public class MineFragment extends BaseFragment {
     RelativeLayout rlUser;
 
     private UserInfo userInfo;
-
+    private DeviceListInfo deviceListInfo;
 
     public static MineFragment getInstance() {
         MineFragment mineFragment = new MineFragment();
@@ -103,6 +108,33 @@ public class MineFragment extends BaseFragment {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+            }
+        });
+
+        Http.getDeviceList(getActivity(), new Http.OnListener() {
+            @Override
+            public void onSucc(Object object) {
+                String res = (String) object;
+                int state = 0;
+                try {
+                    state = new JSONObject(res).getInt("state");
+                    switch (state) {
+                        case 0:
+                            deviceListInfo = new Gson().fromJson(res, DeviceListInfo.class);
+                            break;
+                        case 2002:
+                            if (deviceListInfo == null) {
+                                AppData.showToast(getActivity(), R.string.add_device_first);
+                                return;
+                            }
+                            AppData.showToast(getActivity(), R.string.no_msg);
+                            break;
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
             }
         });
     }
@@ -140,16 +172,18 @@ public class MineFragment extends BaseFragment {
             case R.id.ll_question:
                 break;
             case R.id.iv_pwd_more:
-                break;
-            case R.id.ll_pwd:
+            case R.id.ll_pwd://修改密码
+                Intent intent1 = new Intent(getActivity(), AlterPwdActivity.class);
+                intent1.putExtra("type", "alter");
+                getActivity().startActivity(intent1);
                 break;
             case R.id.iv_about_more:
-                break;
-            case R.id.ll_about:
+            case R.id.ll_about://关于app
+                getActivity().startActivity(new Intent(getActivity(), AboutActivity.class));
                 break;
             case R.id.iv_feedback_more:
-                break;
             case R.id.ll_feedback:
+                getActivity().startActivity(new Intent(getActivity(), FeedbackActivity.class));
                 break;
         }
     }

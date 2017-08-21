@@ -1,21 +1,23 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/dialog_view" 
-	android:orientation="vertical"
-	android:layout_width="fill_parent" 
-	android:layout_height="fill_parent"
-	android:minHeight="60dp"
-	android:minWidth="180dp"
-	android:gravity="center"
-	android:padding="10dp">
+    android:id="@+id/dialog_view"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center"
+    android:minHeight="60dp"
+    android:minWidth="180dp"
+    android:orientation="vertical"
+    android:padding="10dp">
 
-	<ProgressBar
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content" />
-	<TextView 
-	    android:id="@+id/tipTextView"
-		android:layout_width="wrap_content" 
-		android:layout_height="wrap_content"
-		android:layout_marginTop="10dp"
-		android:text="@string/loading"
-		android:textSize="14sp" />
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminateDrawable="@drawable/progress" />
+
+    <TextView
+        android:id="@+id/tipTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/loading"
+        android:textSize="14sp" />
 </LinearLayout>

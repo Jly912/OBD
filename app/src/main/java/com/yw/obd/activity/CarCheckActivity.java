@@ -66,6 +66,7 @@ public class CarCheckActivity extends BaseActivity {
         ivBack.setVisibility(View.VISIBLE);
         id = getIntent().getStringExtra("id");
         name = getIntent().getStringExtra("name");
+        Log.e("print", "id" + id + "name" + name);
         runThread = new RunThread();
         startAnim();
         runBar();
@@ -141,6 +142,8 @@ public class CarCheckActivity extends BaseActivity {
 
                                                         break;
                                                     case 2011:
+                                                        ivLine.clearAnimation();
+                                                        tvCheck.setText(R.string.check_succ);
                                                         break;
                                                 }
                                             } catch (JSONException e) {

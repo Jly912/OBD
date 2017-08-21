@@ -1,6 +1,5 @@
 package com.yw.obd.util;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.StringRes;
@@ -30,12 +29,6 @@ public class AppData {
 
     public static void showToast(Context context, String msg) {
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-    }
-
-    private static Dialog dialog;
-    public static void showDialog(Context context){
-        dialog=new Dialog(context);
-
     }
 
     public static AppData GetInstance(Context content) {
@@ -254,5 +247,13 @@ public class AppData {
         sp.edit()
                 .putString("PhoneNumber", object)
                 .commit();
+    }
+
+    public String getLastID() {
+        return sp.getString("LastID", "");
+    }
+
+    public void setLastID(String lastID) {
+        sp.edit().putString("LastID", lastID).commit();
     }
 }

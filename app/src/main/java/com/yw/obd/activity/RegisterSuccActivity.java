@@ -20,6 +20,8 @@ public class RegisterSuccActivity extends BaseActivity {
     ImageButton ivBack;
     @Bind(R.id.tv_title)
     TextView tvTitle;
+    @Bind(R.id.tv_succ)
+    TextView tvSucc;
 
     @Override
     protected int getLayoutId() {
@@ -28,8 +30,16 @@ public class RegisterSuccActivity extends BaseActivity {
 
     @Override
     protected void init() {
+        String type = getIntent().getStringExtra("type");
+        if (type.equals("register")) {
+            tvTitle.setText(R.string.phone_register);
+            tvSucc.setText(R.string.register_succ);
+        } else if (type.equals("forget")) {
+            tvTitle.setText(R.string.forget);
+            tvSucc.setText(R.string.alter_succ);
+        }
         ivBack.setVisibility(View.VISIBLE);
-        tvTitle.setText(R.string.phone_register);
+
     }
 
     @OnClick({R.id.iv_back, R.id.btn_login})

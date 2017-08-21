@@ -7,23 +7,39 @@
     android:orientation="vertical">
 
     <RelativeLayout
+        android:id="@+id/rl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        >
+        android:gravity="center_vertical">
 
-        <Spinner
-            android:id="@+id/sp"
+        <LinearLayout
+            android:id="@+id/ll_car"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"/>
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_car"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tv_car_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/shape_gray"
+                android:textSize="14sp" />
+        </LinearLayout>
 
         <ImageButton
             android:id="@+id/iv_drop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/sp"
             android:background="@null"
             android:padding="5dp"
             android:src="@drawable/btn_dropdown_normal"
@@ -34,9 +50,9 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="@string/home"
-            android:visibility="gone"
             android:textColor="@color/white"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:visibility="gone" />
 
         <ImageButton
             android:id="@+id/iv_alarm"
@@ -74,7 +90,7 @@
         android:background="@drawable/shape_home_textview"
         android:gravity="center"
         android:padding="10dp"
-        android:text="您当前的油耗排名击败全国92%的车主！"
+        android:text="您当前的油耗排名击败全国0%的车主！"
         android:textColor="@color/tool_color" />
 
     <RelativeLayout
@@ -98,7 +114,7 @@
                 android:id="@+id/tv_fuel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="9.6/L"
+                android:text="0/L"
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -135,7 +151,7 @@
                 android:id="@+id/tv_co"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="36/g"
+                android:text="0/g"
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold" />

@@ -2,9 +2,11 @@ package com.yw.obd.activity;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -52,6 +54,7 @@ public class PersonalActivity extends BaseActivity {
     private UserInfo info;
     private Calendar startCalendar = Calendar.getInstance();
     SimpleDateFormat sdfdate = new SimpleDateFormat("yyyy-MM-dd");
+    private Dialog loadingDia;
 
     @Override
     protected int getLayoutId() {
@@ -60,6 +63,13 @@ public class PersonalActivity extends BaseActivity {
 
     @Override
     protected void init() {
+        View inflate = LayoutInflater.from(this).inflate(R.layout.progressdialog, null);
+        loadingDia = new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setView(inflate)
+                .create();
+        loadingDia.show();
+
         tvTitle.setText(getResources().getString(R.string.personal_profile));
         ivBack.setVisibility(View.VISIBLE);
 
@@ -67,6 +77,9 @@ public class PersonalActivity extends BaseActivity {
         Http.getUserInfo(this, new Http.OnListener() {
             @Override
             public void onSucc(Object object) {
+                if (loadingDia != null && loadingDia.isShowing()) {
+                    loadingDia.dismiss();
+                }
                 String res = (String) object;
                 try {
                     int state = Integer.parseInt(new JSONObject(res).getString("state"));
@@ -128,6 +141,10 @@ public class PersonalActivity extends BaseActivity {
                         }
                     });
                 } else {
+                    if (loadingDia != null) {
+                        loadingDia.dismiss();
+                        loadingDia = null;
+                    }
                     finish();
                 }
 
@@ -274,5 +291,14 @@ public class PersonalActivity extends BaseActivity {
                         .show();
                 break;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (loadingDia != null) {
+            loadingDia.dismiss();
+            loadingDia = null;
+        }
+        super.onDestroy();
     }
 }

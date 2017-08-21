@@ -53,10 +53,24 @@
         android:hint="@string/register_pwd2_hint"
         android:inputType="textPassword" />
 
-    <Button
-        android:id="@+id/btn_next"
-        style="@style/ButtonStyle"
-        android:layout_marginTop="30dp"
-        android:text="@string/register" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp">
+
+        <Button
+            android:id="@+id/btn_next"
+            style="@style/ButtonStyle"
+            android:layout_centerInParent="true"
+            android:text="@string/register" />
+
+        <Button
+            android:id="@+id/btn_forget"
+            style="@style/ButtonStyle"
+            android:layout_centerInParent="true"
+            android:text="@string/submit"
+            android:visibility="gone" />
+    </RelativeLayout>
+
 
 </LinearLayout>

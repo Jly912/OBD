@@ -35,6 +35,14 @@
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="XUKVu26qvXrGSAwRaG7gGafW0BwRDWoC" />
 
+        <activity android:name=".activity.SplashActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <!--主页-->
         <activity android:name=".activity.MainActivity">
             <span style="background-color: rgb(255, 0, 0);">
@@ -45,11 +53,7 @@
 
         <!--登录-->
         <activity android:name=".activity.LoginActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <!--注册-->
@@ -77,14 +81,21 @@
 
         <activity android:name=".activity.AddCarActivity" />
 
-        <activity android:name=".activity.SampleActivity">
-
-
-        </activity>
         <activity android:name=".activity.RegisterSuccActivity" />
 
         <activity android:name=".activity.OilActivity" />
-        <activity android:name=".activity.CarCheckActivity"/>
+        <activity android:name=".activity.CarCheckActivity" />
+
+        <activity android:name=".activity.AlarmActivity" />
+        <activity android:name=".activity.ForgetPwdActivity" />
+
+        <activity android:name=".activity.AlterPwdActivity" />
+        <activity android:name=".activity.OilDetailActivity" />
+
+        <service android:name=".service.PushService" />
+
+        <activity android:name=".activity.AboutActivity" />
+        <activity android:name=".activity.FeedbackActivity" />
     </application>
 
 </manifest>

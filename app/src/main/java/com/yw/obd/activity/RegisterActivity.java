@@ -5,6 +5,7 @@ import android.graphics.Paint;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -46,6 +47,11 @@ public class RegisterActivity extends BaseActivity {
     EditText etPwd2;
     @Bind(R.id.btn_next)
     Button btnNext;
+    @Bind(R.id.btn_forget)
+    Button btnForget;
+
+    private int typeCode;
+
     private TextWatcher textWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -72,10 +78,18 @@ public class RegisterActivity extends BaseActivity {
                 btnNext.setEnabled(false);
                 btnNext.setPressed(false);
                 btnNext.setBackgroundColor(getResources().getColor(R.color.board_gray));
+
+                btnForget.setEnabled(false);
+                btnForget.setPressed(false);
+                btnForget.setBackgroundColor(getResources().getColor(R.color.board_gray));
             } else {
                 btnNext.setEnabled(true);
                 btnNext.setPressed(true);
                 btnNext.setBackgroundColor(getResources().getColor(R.color.btn_blue));
+
+                btnForget.setEnabled(true);
+                btnForget.setPressed(true);
+                btnForget.setBackgroundColor(getResources().getColor(R.color.btn_blue));
             }
         }
 
@@ -94,7 +108,6 @@ public class RegisterActivity extends BaseActivity {
     @Override
     protected void init() {
         ivBack.setVisibility(View.VISIBLE);
-
         timerCount = new TimerCount(60000, 1000, tvSendCode, this);
 
         btnNext.setEnabled(false);
@@ -108,41 +121,49 @@ public class RegisterActivity extends BaseActivity {
         tvSendCode.getPaint().setAntiAlias(true);
         tvSendCode.getPaint().setColor(getResources().getColor(R.color.btn_blue));
 
-        tvTitle.setText(R.string.phone_register);
         etPhone.addTextChangedListener(textWatcher);
         etPwd.addTextChangedListener(textWatcher);
         etPwd2.addTextChangedListener(textWatcher);
         etCode.addTextChangedListener(textWatcher);
 
+        String type = getIntent().getStringExtra("type");
+        if (type.equals("register")) {
+            tvTitle.setText(R.string.phone_register);
+            typeCode = 0;
+        } else if (type.equals("forget")) {
+            tvTitle.setText(R.string.forget);
+            btnNext.setVisibility(View.GONE);
+            btnForget.setVisibility(View.VISIBLE);
+            typeCode = 1;
+        }
+
     }
 
-    @OnClick({R.id.tv_send_code, R.id.btn_next, R.id.iv_back})
+    @OnClick({R.id.tv_send_code, R.id.btn_next, R.id.iv_back, R.id.btn_forget})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tv_send_code:
-                Http.sendSMSCode(this, etPhone.getText().toString().trim(), new Http.OnListener() {
+                Log.e("print", "tvSendCode");
+                timerCount.start();
+                Http.sendSMSCode(this, etPhone.getText().toString().trim(), typeCode, new Http.OnListener() {
                     @Override
                     public void onSucc(Object object) {
                         String res = (String) object;
-                        try {
-                            int state = Integer.parseInt(new JSONObject(res).getString("state"));
-                            switch (state) {
-                                case 0:
-                                    AppData.showToast(RegisterActivity.this, R.string.send_failed);
-                                    break;
-                                case 1:
-                                    AppData.showToast(RegisterActivity.this, R.string.send_succ);
-                                    timerCount.start();
-                                    break;
-                                case 2:
-                                    AppData.showToast(RegisterActivity.this, R.string.over_limit);
-                                    break;
-                                case 3:
-                                    AppData.showToast(RegisterActivity.this, R.string.sms_send_frequency);
-                                    break;
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                        int state = Integer.parseInt(res);
+                        switch (state) {
+                            case 0:
+                                AppData.showToast(RegisterActivity.this, R.string.send_failed);
+                                break;
+                            case 1:
+                                AppData.showToast(RegisterActivity.this, R.string.send_succ);
+                                timerCount.start();
+                                break;
+                            case 2:
+                                AppData.showToast(RegisterActivity.this, R.string.over_limit);
+                                break;
+                            case 3:
+                                AppData.showToast(RegisterActivity.this, R.string.sms_send_frequency);
+                                break;
                         }
                     }
                 });
@@ -161,6 +182,17 @@ public class RegisterActivity extends BaseActivity {
                 break;
             case R.id.iv_back:
                 finish();
+                break;
+            case R.id.btn_forget:
+                String tel = etPhone.getText().toString().trim();
+                String c = etCode.getText().toString().trim();
+                String pwd11 = etPwd.getText().toString().trim();
+                String pwd22 = etPwd2.getText().toString().trim();
+                if (!pwd11.equals(pwd22)) {
+                    AppData.showToast(this, R.string.pwd_not_same);
+                    return;
+                }
+                forgetPwd(tel, c, pwd22);
                 break;
         }
     }
@@ -196,4 +228,41 @@ public class RegisterActivity extends BaseActivity {
     }
 
 
+    private void forgetPwd(String tel, String code, String pwd) {
+        Http.forgetPwd(this, tel, pwd, code, new Http.OnListener() {
+            @Override
+            public void onSucc(Object object) {
+                String res = (String) object;
+                try {
+                    int state = new JSONObject(res).getInt("state");
+                    switch (state) {
+                        case 0:
+                            AppData.showToast(RegisterActivity.this, R.string.update_succ);
+                            finish();
+                            break;
+                        case 1003:
+                            AppData.showToast(RegisterActivity.this, R.string.user_empty);
+                            break;
+                        case 2005:
+                            AppData.showToast(RegisterActivity.this, R.string.update_succ);
+                            finish();
+                            break;
+                        case 2004:
+                            AppData.showToast(RegisterActivity.this, R.string.update_failed);
+                            break;
+                        case 2001:
+                            break;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        timerCount.cancel();
+        super.onDestroy();
+    }
 }

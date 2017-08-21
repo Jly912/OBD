@@ -1,7 +1,10 @@
 package com.yw.obd.activity;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Intent;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -11,6 +14,7 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.yw.obd.R;
 import com.yw.obd.base.BaseActivity;
+import com.yw.obd.entity.DeviceListInfo;
 import com.yw.obd.entity.LoginInfo;
 import com.yw.obd.http.Http;
 import com.yw.obd.util.AppData;
@@ -41,6 +45,7 @@ public class LoginActivity extends BaseActivity {
     TextView tvPhoneRegister;
     @Bind(R.id.tv_forget_pwd)
     TextView tvForgetPwd;
+    private Dialog loadingDia;
 
     @Override
     protected int getLayoutId() {
@@ -49,6 +54,12 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     protected void init() {
+        View inflate = LayoutInflater.from(this).inflate(R.layout.progressdialog, null);
+        loadingDia = new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setView(inflate)
+                .create();
+
         String userName = AppData.GetInstance(this).getUserName();
         etUser.setText(userName);
         etUser.setSelection(userName.length());
@@ -78,9 +89,15 @@ public class LoginActivity extends BaseActivity {
                     return;
                 }
 
+                if (loadingDia != null && !loadingDia.isShowing()) {
+                    loadingDia.show();
+                }
                 Http.getLogin(this, user, pwd, new Http.OnListener() {
                     @Override
                     public void onSucc(Object object) {
+                        if (loadingDia != null && loadingDia.isShowing()) {
+                            loadingDia.dismiss();
+                        }
                         String res = (String) object;
                         try {
                             int state = Integer.parseInt(new JSONObject(res).getString("state"));
@@ -93,8 +110,7 @@ public class LoginActivity extends BaseActivity {
                                     AppData.GetInstance(LoginActivity.this).setUserId(Integer.parseInt(loginInfo.getInfo().getUserID()));
                                     AppData.GetInstance(LoginActivity.this).setLoginRemember(cb.isChecked());
                                     AppData.GetInstance(LoginActivity.this).setUserPass(etPwd.getText().toString().trim());
-                                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                                    finish();
+                                    getDeviceList();
                                     break;
                                 case 1008://手机号不存在
                                     AppData.showToast(LoginActivity.this, R.string.user_empty);
@@ -116,12 +132,54 @@ public class LoginActivity extends BaseActivity {
                 });
                 break;
             case R.id.tv_phone_register://手机注册
-                startActivity(new Intent(this, RegisterActivity.class));
+                Intent intent = new Intent(this, RegisterActivity.class);
+                intent.putExtra("type", "register");
+                startActivity(intent);
                 break;
             case R.id.tv_forget_pwd://忘记密码
+                Intent intent2 = new Intent(this, RegisterActivity.class);
+                intent2.putExtra("type", "forget");
+                startActivity(intent2);
                 break;
         }
     }
 
+    private DeviceListInfo deviceListInfo;
 
+    private void getDeviceList() {
+        Http.getDeviceList(this, new Http.OnListener() {
+            @Override
+            public void onSucc(Object object) {
+                String res = (String) object;
+                try {
+                    int state = new JSONObject(res).getInt("state");
+                    switch (state) {
+                        case 0:
+                            deviceListInfo = new Gson().fromJson(res, DeviceListInfo.class);
+                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                            finish();
+                            break;
+                        case 2002:
+                            Intent intent = new Intent(LoginActivity.this, AddCarActivity.class);
+                            intent.putExtra("type", "login");
+                            startActivity(intent);
+                            finish();
+                            break;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (loadingDia != null) {
+            loadingDia.dismiss();
+            loadingDia = null;
+        }
+        super.onDestroy();
+    }
 }

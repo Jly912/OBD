@@ -2,6 +2,7 @@ package com.yw.obd.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -88,6 +89,7 @@ public class AddCarActivity extends BaseActivity implements WebService.WebServic
     private String typeYear = "";
     private String gearbox = "";
     private String displacement = "";
+    private String type = "";
 
     @Override
     protected int getLayoutId() {
@@ -98,6 +100,10 @@ public class AddCarActivity extends BaseActivity implements WebService.WebServic
     protected void init() {
         tvTitle.setText(getResources().getString(R.string.add_car));
         ivBack.setVisibility(View.VISIBLE);
+
+        type = getIntent().getStringExtra("type");
+        Log.d("print", "----" + type);
+
     }
 
     @OnClick({R.id.iv_car_brand_more, R.id.ll_car_brand, R.id.iv_car_type_more, R.id.ll_car_type, R.id.iv_model_year_more, R.id.ll_model_year, R.id.btn_submit, R.id.iv_back})
@@ -340,7 +346,13 @@ public class AddCarActivity extends BaseActivity implements WebService.WebServic
                         break;
                     case 2007:
                         AppData.showToast(this, R.string.add_succ);
-                        finish();
+                        if (type == null) {
+                            finish();
+                        } else if (type.equals("login")) {
+                            startActivity(new Intent(this, MainActivity.class));
+                            Log.d("print", "type" + type);
+                            finish();
+                        }
                         break;
                     case 2010:
                         AppData.showToast(this, R.string.add_same);

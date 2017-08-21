@@ -17,7 +17,7 @@ public class TimeUtils {
 	public static String DateConversionUtilA(String date) {
 		String dates = null;
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy��MM��dd��");
+		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat sdf2 = new SimpleDateFormat("MMM d, yyyy",
 				Locale.ENGLISH);
 		if (AppContext.getContext().getResources().getConfiguration().locale
@@ -40,7 +40,7 @@ public class TimeUtils {
 	public static String DateConversionUtilAA(String date) {
 		String dates = null;
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy��MM��dd��");
+		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat sdf2 = new SimpleDateFormat("MMM d, yyyy",
 				Locale.ENGLISH);
 		if (AppContext.getContext().getResources().getConfiguration().locale
