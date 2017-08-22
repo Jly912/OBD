@@ -107,6 +107,10 @@ public class PushService extends Service {
         Http.getNewWarn(this, lastID, new Http.OnListener() {
             @Override
             public void onSucc(Object object) {
+                if (object == null) {
+                    AppData.showToast(PushService.this, getResources().getString(R.string.connect_overtime));
+                    return;
+                }
                 String res = (String) object;
 //                Log.d("print", "--getWarn--" + res);
                 try {

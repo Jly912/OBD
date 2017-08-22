@@ -14,6 +14,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -104,6 +105,7 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
     private TextView tvContent, tvStatus, tvLoc, tvVol, tvTime, tvDirect, tvSpeed, tvAd;
     private RelativeLayout rlContent;
     private Button btnCommand, btnLocus;
+    private BDLocation location;
 
     //定位相关
     private MyLocationListener myLocationListener = new MyLocationListener();
@@ -267,6 +269,7 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
         });
     }
 
+    private String add = "";
 
     private void getDeviceTracking(String deviceId) {
         Http.getTracking(getActivity(), deviceId, new Http.OnListener() {
@@ -288,8 +291,15 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
                             int i = CaseData.returnIconInt(Integer.parseInt(trackingInfo.getCourse()), Integer.parseInt(split[0]));
                             OverlayOptions options = new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.fromResource(i)).zIndex(5);
                             baiduMap.addOverlay(options);
-                            showInfoWindow(trackingInfo, latLng);
+                            Http.getAddress(getActivity(), trackingInfo.getLat(), trackingInfo.getLng(), "Baidu", new Http.OnListener() {
+                                @Override
+                                public void onSucc(Object object) {
+                                    add = (String) object;
+                                    tvAd.setText(getResources().getString(R.string.address) + add);
 
+                                }
+                            });
+                            showInfoWindow(trackingInfo, latLng);
                             Log.e("print", "lockM" + lockM + latLng + "_--" + mCurrentLat + "__-" + mCurrentLon);
                             if (lockM) {
                                 // 将地图移到到最后一个经纬度位置
@@ -317,19 +327,26 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED
-                || ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            //申请WRITE_EXTERNAL_STORAGE权限
-            ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
-                            Manifest.permission.ACCESS_FINE_LOCATION},
-                    ACCESS_COARSE_LOCATION_REQUEST_CODE);
-            setMap();
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {//未授权
+                if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                    getActivity().shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION);
+                } else {
+                    //申请WRITE_EXTERNAL_STORAGE权限
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_COARSE_LOCATION_REQUEST_CODE);
+                }
+                setMap();
+            } else {
+                setMap();
+            }
         } else {
             setMap();
         }
+
 
         getDeviceList();
     }
@@ -343,7 +360,6 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
                 // Permission Granted
                 setMap();
             } else {
-                // Permission Denied
                 AppData.showToast(getActivity(), getResources().getString(R.string.refuse_enter));
             }
         }
@@ -353,6 +369,30 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.iv_people:
+//                Log.e("print", "myListener" + myLocationListener.getLocation());
+//                if (null == myLocationListener.getLocation().getAddrStr()) {
+//                    if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)
+//                            == PackageManager.PERMISSION_DENIED
+//                            || ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
+//                            == PackageManager.PERMISSION_DENIED) {
+//
+//                        if (Build.VERSION.SDK_INT >= 23) {
+//                            Log.e("print", "-----denied=---");
+//                            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)) {
+//
+//                                Log.e("print", "-----denied=--222-");
+//                                getActivity().shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION);
+//                            } else {
+//                                //申请WRITE_EXTERNAL_STORAGE权限
+//                                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
+//                                        Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_COARSE_LOCATION_REQUEST_CODE);
+//                            }
+//                            setMap();
+//                        }
+//                    } else {
+//                        setMap();
+//                    }
+//                }
                 if (trackingInfo == null) {
                     return;
                 }
@@ -506,18 +546,14 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
 
             tvTime.setText(getResources().getString(R.string.time) + "：" + info.getPositionTime());
 
-            Http.getAddress(getActivity(), info.getLat(), info.getLng(), "Baidu", new Http.OnListener() {
-                @Override
-                public void onSucc(Object object) {
-                    String add = (String) object;
-                    tvAd.setText(getResources().getString(address) + add);
-                }
-            });
             mInfoWindow = new InfoWindow(infoWindow, latLng, -47);
             baiduMap.showInfoWindow(mInfoWindow);
 
             // 将地图移到到最后一个经纬度位置
             MapStatusUpdate u = MapStatusUpdateFactory.newLatLng(latLng);
+            lockM = false;
+            ivCar.setPressed(true);
+            ivCar.setFocusable(true);
             baiduMap.setMapStatus(u);
         }
     }
@@ -527,9 +563,15 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
      */
     public class MyLocationListener implements BDLocationListener {
 
+        private BDLocation location;
+
+        public BDLocation getLocation() {
+            return this.location;
+        }
+
         @Override
         public void onReceiveLocation(BDLocation location) {
-            Log.d("print", "location---" + location.getAddrStr());
+            this.location = location;
             // map view 销毁后不在处理新接收的位置
             if (location == null || map == null) {
                 return;
@@ -597,9 +639,7 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
     public void onResume() {
         map.onResume();
         getDeviceList();
-        Log.e("print", "onr");
         super.onResume();
-        Log.e("print", "onr22");
         baiduMap.setMyLocationEnabled(true);
         //为系统的方向传感器注册监听器
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
@@ -637,6 +677,10 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
     public void onHiddenChanged(boolean hidden) {
         if (!hidden) {
             getDeviceList();
+        } else {
+            if (loadingDia != null) {
+                loadingDia.dismiss();
+            }
         }
     }
 

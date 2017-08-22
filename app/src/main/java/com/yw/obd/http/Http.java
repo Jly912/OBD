@@ -37,6 +37,7 @@ public class Http {
     private static final int GET_DETAIL_OIL = 0x012;
     private static final int UPDATE_PWD = 0x013;
     private static final int FORGET_PWD = 0x014;
+    private static final int FEEDBACK = 0x015;
     private static final String KEY = "20170801CHLOBDYW028M";
 
     /**
@@ -106,7 +107,7 @@ public class Http {
      * @param loginName
      * @param listener
      */
-    public static void sendSMSCode(Context context, String loginName,int type, final OnListener listener) {
+    public static void sendSMSCode(Context context, String loginName, int type, final OnListener listener) {
         WebService web = new WebService(context, SEND_CODE, false, "SendSMSCode");
         HashMap<String, Object> property = new HashMap<>();
         property.put("key", KEY);
@@ -159,7 +160,7 @@ public class Http {
      * @param listener
      */
     public static void forgetPwd(Context context, String tel, String pwd, String code, final OnListener listener) {
-        WebService web = new WebService(context, UPDATE_PWD, false, "ForgotPassword");
+        WebService web = new WebService(context, FORGET_PWD, false, "ForgotPassword");
         HashMap<String, Object> property = new HashMap<>();
         property.put("loginName", tel);
         property.put("password", pwd);
@@ -599,6 +600,7 @@ public class Http {
         web.addWebServiceListener(new WebService.WebServiceListener() {
             @Override
             public void onWebServiceReceive(String method, int id, String result) {
+                Log.e("print", "getNewWarn---" + result);
                 if (listener != null) {
                     listener.onSucc(result);
                 }
@@ -687,6 +689,29 @@ public class Http {
         property.put("timeZones", AppData.GetInstance(context).getTimeZone());
         property.put("interval", interval);
         Log.e("print", "getoilDetail" + property);
+        web.addWebServiceListener(new WebService.WebServiceListener() {
+            @Override
+            public void onWebServiceReceive(String method, int id, String result) {
+                if (listener != null) {
+                    listener.onSucc(result);
+                }
+            }
+        });
+        web.SyncGet(property);
+    }
+
+    /**
+     * 获得反馈信息
+     *
+     * @param context
+     * @param listener
+     */
+    public static void getFeedback(Context context, final OnListener listener) {
+        WebService web = new WebService(context, FEEDBACK, false, "GetFeedback");
+        HashMap<String, Object> property = new HashMap<>();
+        property.put("loginName", AppData.GetInstance(context).getUserName());
+        property.put("password", AppData.GetInstance(context).getUserPass());
+        property.put("key", KEY);
         web.addWebServiceListener(new WebService.WebServiceListener() {
             @Override
             public void onWebServiceReceive(String method, int id, String result) {

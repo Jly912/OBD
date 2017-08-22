@@ -1,5 +1,7 @@
 package com.yw.obd.fragment;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -39,6 +41,9 @@ public class MineFragment extends BaseFragment {
     ImageButton ivBack;
     @Bind(R.id.tv_title)
     TextView tvTitle;
+    @Bind(R.id.tv_right)
+    TextView tvRight;
+
     @Bind(R.id.iv_icon)
     CircleImageView ivIcon;
     @Bind(R.id.tv_name)
@@ -142,10 +147,12 @@ public class MineFragment extends BaseFragment {
     @Override
     protected void initView(View view) {
         tvTitle.setText(getResources().getString(R.string.mine));
+        tvRight.setText(getResources().getString(R.string.exit));
+        tvRight.setVisibility(View.VISIBLE);
     }
 
     @OnClick({R.id.rl_user, R.id.iv_icon, R.id.iv_name_more, R.id.iv_car_more, R.id.ll_car, R.id.iv_report_more, R.id.ll_report, R.id.iv_question_more, R.id.ll_question, R.id.iv_pwd_more, R.id.ll_pwd, R.id.iv_about_more,
-            R.id.ll_about, R.id.iv_feedback_more, R.id.ll_feedback, R.id.iv_oil_more, R.id.ll_oil})
+            R.id.ll_about, R.id.iv_feedback_more, R.id.ll_feedback, R.id.iv_oil_more, R.id.ll_oil, R.id.tv_right})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.rl_user:
@@ -184,6 +191,23 @@ public class MineFragment extends BaseFragment {
             case R.id.iv_feedback_more:
             case R.id.ll_feedback:
                 getActivity().startActivity(new Intent(getActivity(), FeedbackActivity.class));
+                break;
+            case R.id.tv_right:
+                new AlertDialog.Builder(getActivity())
+                        .setTitle(R.string.app_name)
+                        .setMessage(R.string.sure_exit)
+                        .setPositiveButton(R.string.submit, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                getActivity().finish();
+                            }
+                        }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).show();
                 break;
         }
     }

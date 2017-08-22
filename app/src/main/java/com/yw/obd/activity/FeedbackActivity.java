@@ -6,6 +6,10 @@ import android.widget.TextView;
 
 import com.yw.obd.R;
 import com.yw.obd.base.BaseActivity;
+import com.yw.obd.http.Http;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import butterknife.Bind;
 import butterknife.OnClick;
@@ -33,6 +37,27 @@ public class FeedbackActivity extends BaseActivity {
     protected void init() {
         tvTitle.setText(R.string.feedback);
         ivBack.setVisibility(View.VISIBLE);
+
+        Http.getFeedback(this, new Http.OnListener() {
+            @Override
+            public void onSucc(Object object) {
+                if (object != null) {
+                    String res = (String) object;
+                    try {
+                        JSONObject jsonObject = new JSONObject(res);
+                        int state = jsonObject.getInt("state");
+                        if (state == 0) {
+                            String qq = jsonObject.getString("qq");
+                            String phone = jsonObject.getString("phone");
+                            tvQq.setText(qq);
+                            tvTel.setText(phone);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 
     @OnClick(R.id.iv_back)

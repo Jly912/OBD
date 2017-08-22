@@ -135,6 +135,13 @@ public class HomeFragment extends BaseFragment {
         Http.getDeviceList(getActivity(), new Http.OnListener() {
             @Override
             public void onSucc(Object object) {
+                if (object == null) {
+                    AppData.showToast(getActivity(), R.string.connect_overtime);
+                    if (loadingDia != null && loadingDia.isShowing()) {
+                        loadingDia.dismiss();
+                    }
+                    return;
+                }
                 String res = (String) object;
                 try {
                     JSONObject jsonObject = new JSONObject(res);
@@ -188,8 +195,6 @@ public class HomeFragment extends BaseFragment {
 
     }
 
-    private String ranking = "您当前的油耗排名击败全国%s的车主！";
-
     private void getHomeData(String id) {
         Http.getHomeData(getActivity(), id, new Http.OnListener() {
             @Override
@@ -208,12 +213,12 @@ public class HomeFragment extends BaseFragment {
                             String rank = jo.getString("ranking");
                             tvFuel.setText(tripFuel + "/L");
                             tvCo.setText(carbon + "/g");
-                            tvRound.setText(String.format(ranking, rank));
+                            tvRound.setText(getResources().getString(R.string.homeLeft) + rank + getResources().getString(R.string.homeRight));
                             break;
                         case 2002:
                             tvFuel.setText(0.0 + "/L");
                             tvCo.setText(0.0 + "/g");
-                            tvRound.setText(String.format(ranking, "0%"));
+                            tvRound.setText(getResources().getString(R.string.homeLeft) + "0%" + getResources().getString(R.string.homeRight));
                             break;
                     }
                 } catch (JSONException e) {
@@ -228,6 +233,10 @@ public class HomeFragment extends BaseFragment {
         if (!hidden) {
             loadingDia.show();
             getDeviceList();
+        } else {
+            if (loadingDia != null) {
+                loadingDia.dismiss();
+            }
         }
     }
 

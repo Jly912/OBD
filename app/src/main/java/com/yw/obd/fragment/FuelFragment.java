@@ -43,6 +43,7 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -57,6 +58,7 @@ import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.PointValue;
 import lecho.lib.hellocharts.model.SubcolumnValue;
 import lecho.lib.hellocharts.model.ValueShape;
+import lecho.lib.hellocharts.model.Viewport;
 import lecho.lib.hellocharts.util.ChartUtils;
 import lecho.lib.hellocharts.view.ColumnChartView;
 import lecho.lib.hellocharts.view.LineChartView;
@@ -158,7 +160,7 @@ public class FuelFragment extends BaseFragment {
         for (int i = 0; i < 5; i++) {
             dd.add(0.0f);
         }
-        initLineChart(dd);
+        initLineChart(dd, 0);
 
         List<Float> mm = new ArrayList<>();
 
@@ -227,9 +229,7 @@ public class FuelFragment extends BaseFragment {
     private boolean isExist = false;
 
     private void getDeviceList() {
-        if (loadingDia != null && !loadingDia.isShowing()) {
-            loadingDia.show();
-        }
+        loadingDia.show();
         Http.getDeviceList(getActivity(), new Http.OnListener() {
             @Override
             public void onSucc(Object object) {
@@ -286,10 +286,6 @@ public class FuelFragment extends BaseFragment {
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     private void getOil(String deviceId) {
-        if (loadingDia != null && !loadingDia.isShowing()) {
-            loadingDia.show();
-        }
-
         Http.getCarOil(getActivity(), sdf.format(new Date(System.currentTimeMillis())), deviceId, new Http.OnListener() {
             @Override
             public void onSucc(Object object) {
@@ -347,7 +343,13 @@ public class FuelFragment extends BaseFragment {
                             weekOils.add(Float.parseFloat(oiLweek3));
                             weekOils.add(Float.parseFloat(oiLweek4));
 
-                            initLineChart(weekOils);
+                            List<Integer> dat = new ArrayList<Integer>();
+                            for (int i = 0; i < weekOils.size(); i++) {
+                                dat.add(weekOils.get(i).intValue());
+                            }
+
+                            Log.e("print", "dat---" + dat + "===max" + Collections.max(dat));
+                            initLineChart(weekOils, (Collections.max(dat) / 10 + 1) * 10);
 
                             //月数据
                             String oiLmonth1 = oilInfo.getOILmonth1();
@@ -409,8 +411,10 @@ public class FuelFragment extends BaseFragment {
          /*===== 坐标轴相关设置 =====*/
         Axis axisX = new Axis(axisValues);
         axisX.setTextColor(getResources().getColor(R.color.tab_bg));//设置X轴文字颜色
-        Axis axisY = new Axis().setHasLines(true);
+        axisX.setHasLines(true);
+        Axis axisY = new Axis();
         axisY.setTextColor(getResources().getColor(R.color.tab_bg));//设置Y轴文字颜色
+        axisY.setHasLines(true);
         columnChartData.setAxisXBottom(axisX); //设置横轴
         columnChartData.setAxisYLeft(axisY);   //设置竖轴
 
@@ -418,10 +422,12 @@ public class FuelFragment extends BaseFragment {
         columnChart.setColumnChartData(columnChartData);
     }
 
-    private void initLineChart(List<Float> data) {
+    private void initLineChart(List<Float> data, int top) {
         //折线图相关
         generateValues(data);
         generateData(data);
+        lineChart.setViewportCalculationEnabled(false);
+        resetViewport(top);
     }
 
     private void generateValues(List<Float> data) {
@@ -440,6 +446,7 @@ public class FuelFragment extends BaseFragment {
                 values.add(new PointValue(j, data.get(j)));
             }
 
+            Log.e("print", "values---" + values);
             Line line = new Line(values);
             line.setColor(ChartUtils.COLOR_ORANGE);//设置折线图颜色
             line.setShape(ValueShape.CIRCLE);//节点图形样式 DIAMOND菱形、SQUARE方形、CIRCLE圆形
@@ -450,14 +457,14 @@ public class FuelFragment extends BaseFragment {
             line.setHasLines(true);//是否显示折线
             line.setHasPoints(true);//是否显示这点
             line.setPointColor(ChartUtils.COLOR_ORANGE);//设置节点颜色
-
             lines.add(line);//将数据集合添加到线
         }
 
         lineChartData = new LineChartData(lines);
+        lineChartData.setBaseValue(20);
+
 
         weeks.clear();
-
         weeks.add("");
         weeks.add(getResources().getString(R.string.this_week));
         weeks.add(getResources().getString(R.string.last_week));
@@ -471,17 +478,42 @@ public class FuelFragment extends BaseFragment {
 
         if (hasAxes) {
             Axis axisX = new Axis(xValues);
+            axisX.setHasLines(true);
             axisX.setTextColor(getResources().getColor(R.color.tab_bg));//设置X轴文字颜色
             Axis axisY = new Axis().setHasLines(true);
+            axisY.setMaxLabelChars(6);//max label length, for example 60
+            List<AxisValue> values = new ArrayList<>();
+            for (int i = 0; i < 100; i += 10) {
+                AxisValue value = new AxisValue(i);
+                String label = i + "";
+                value.setLabel(label);
+                values.add(value);
+            }
+            axisY.setValues(values);
             axisY.setTextColor(getResources().getColor(R.color.tab_bg));//设置Y轴文字颜色
             lineChartData.setAxisXBottom(axisX);
             lineChartData.setAxisYLeft(axisY);//将Y轴属性设置到左边
+            lineChartData.getAxisYLeft().setHasLines(true);
         } else {
             lineChartData.setAxisXBottom(null);
             lineChartData.setAxisYLeft(null);
         }
         lineChartData.setBaseValue(Float.NEGATIVE_INFINITY);//设置反向覆盖区域颜色
         lineChart.setLineChartData(lineChartData);//将数据添加到控件中
+    }
+
+    private void resetViewport(int top) {
+        // Reset viewport height range to (0,100)
+        final Viewport v = new Viewport(lineChart.getMaximumViewport());
+        v.bottom = 0;
+        if (top == 0) {
+            top = 100;
+        }
+        v.top = top;
+        v.left = 0;
+        v.right = numberOfPoints;
+        lineChart.setMaximumViewport(v);
+        lineChart.setCurrentViewport(v);
     }
 
     private void initHBBar(final List<Float> datas, final List<String> xValues) {
@@ -499,7 +531,6 @@ public class FuelFragment extends BaseFragment {
         xl.setValueFormatter(new IAxisValueFormatter() {
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
-                Log.d("print", "xl----value" + value);
                 if (value == 0.f) {
                     return xValues.get(0);
                 } else if (value == 10.f) {
@@ -560,15 +591,16 @@ public class FuelFragment extends BaseFragment {
         hBarChart.setData(ba);
         hBarChart.setFitBars(true);//如果设置为true，图表将避免第一个和最后一个标签条目被减掉在图表或屏幕的边缘
         hBarChart.invalidate();
-
-//        llLoad.setVisibility(View.GONE);
     }
 
     @Override
     public void onHiddenChanged(boolean hidden) {
         if (!hidden) {
-//            llLoad.setVisibility(View.VISIBLE);
             getDeviceList();
+        } else {
+            if (loadingDia != null) {
+                loadingDia.dismiss();
+            }
         }
     }
 
