@@ -202,13 +202,16 @@ public class RegisterActivity extends BaseActivity {
             @Override
             public void onSucc(Object object) {
                 String res = (String) object;
+                Log.e("print", "res----" + res);
                 try {
                     JSONObject jo = new JSONObject(res);
                     int state = Integer.parseInt(jo.getString("state"));
                     if (state == 0) {
                         LoginInfo loginInfo = new Gson().fromJson(res, LoginInfo.class);
                         AppData.showToast(RegisterActivity.this, R.string.register_succ);
-                        startActivity(new Intent(RegisterActivity.this, RegisterSuccActivity.class));
+                        Intent intent = new Intent(RegisterActivity.this, RegisterSuccActivity.class);
+                        intent.putExtra("type", "register");
+                        startActivity(intent);
                         finish();
                     } else if (state == 1003) {
                         AppData.showToast(RegisterActivity.this, R.string.user_existed);

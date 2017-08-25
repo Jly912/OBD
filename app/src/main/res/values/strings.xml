@@ -222,7 +222,7 @@
     <string name="submit_alter">确认修改</string>
     <string name="add_device_first">请先添加设备</string>
     <string name="exit">退出</string>
-    
+
     <string name="baidu">百度</string>
     <string name="gaode">高德</string>
     <string name="google">谷歌</string>
@@ -236,4 +236,39 @@
     <string name="homeLeft">您当前的油耗排名击败全国</string>
     <string name="homeRight">的车主!</string>
     <string name="connect_overtime">连接超时！</string>
+    <string name="location_dialog">请设置定位权限，否则无法精确定位您的位置</string>
+    <string name="cant_get_data">您还未激活服务，所以无法获得实时数据</string>
+    <string name="check_locate_permission">定位不到您的位置，请确保定位权限已经打开</string>
+    <string name="electric_fence">电子栅栏</string>
+    <string name="history_traces">历史轨迹</string>
+    <string name="beyoardNow">您选择的时间超过今天</string>
+    <string name="beyoardNowMonth">您选择的时间超过本月</string>
+    <string name="add_ele">添加</string>
+    <string name="add_electric_fence">添加电子栅栏</string>
+    <string name="fence_name">名称</string>
+    <string name="refer">提交</string>
+    <string name="lat">经度</string>
+    <string name="lng">纬度</string>
+    <string name="radius">半径</string>
+    <string name="setting">设置</string>
+    <string name="msg_setting">消息设置</string>
+    <string name="wifi_setting">WIFI设置</string>
+    <string name="series_number">序列号</string>
+    <string name="wifi_hotspot">WIFI热点</string>
+    <string name="reset_wifi">重置WIFI名称密码</string>
+    <string name="set_wifi">设置WIFI名称密码</string>
+    <string name="sure_reset_wifi">确定要重置WIFI名称和密码吗？</string>
+    <string name="set_wifi_name">请设置WIFI名称</string>
+    <string name="set_wifi_pwd">请设置WIFI密码</string>
+    <string name="voice">声音</string>
+    <string name="vibrate">震动</string>
+    <string name="take_over_msg">接收新消息通知</string>
+    <string name="name_empty">请输入围栏名称</string>
+    <string name="point_empty">请选择中心点</string>
+    <string name="radius_empty">请输入围栏半径</string>
+    <string name="point_error">中心点纬度输入错误</string>
+    <string name="radius_error_100">围栏半径不能小于100米</string>
+    <string name="radius_error">围栏半径输入错误</string>
+    <string name="saveSucess">保存成功</string>
+    <string name="savefailed">保存失败</string>
 </resources>

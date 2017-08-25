@@ -9,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -68,10 +67,7 @@ import lecho.lib.hellocharts.view.LineChartView;
  */
 
 public class FuelFragment extends BaseFragment {
-    @Bind(R.id.iv_drop)
-    ImageButton ivDrop;
-    @Bind(R.id.tv_title)
-    TextView tvTitle;
+
     @Bind(R.id.tv_rank)
     TextView tvRank;
     @Bind(R.id.tv_detail)
@@ -229,7 +225,7 @@ public class FuelFragment extends BaseFragment {
     private boolean isExist = false;
 
     private void getDeviceList() {
-        loadingDia.show();
+//        loadingDia.show();
         Http.getDeviceList(getActivity(), new Http.OnListener() {
             @Override
             public void onSucc(Object object) {
@@ -286,6 +282,7 @@ public class FuelFragment extends BaseFragment {
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     private void getOil(String deviceId) {
+//        loadingDia.show();
         Http.getCarOil(getActivity(), sdf.format(new Date(System.currentTimeMillis())), deviceId, new Http.OnListener() {
             @Override
             public void onSucc(Object object) {
@@ -604,11 +601,9 @@ public class FuelFragment extends BaseFragment {
         }
     }
 
-    @OnClick({R.id.iv_drop, R.id.tv_rank, R.id.tv_detail, R.id.ll_car})
+    @OnClick({ R.id.tv_rank, R.id.tv_detail, R.id.ll_car})
     public void onViewClicked(View view) {
         switch (view.getId()) {
-            case R.id.iv_drop:
-                break;
             case R.id.tv_rank:
                 break;
             case R.id.tv_detail:

@@ -96,6 +96,19 @@
 
         <activity android:name=".activity.AboutActivity" />
         <activity android:name=".activity.FeedbackActivity" />
+
+        <activity android:name=".activity.ElectricFenceActivity">
+
+        </activity>
+        <activity android:name=".activity.AddFenceActivity">
+
+        </activity>
+
+        <activity android:name=".activity.SettingActivity" />
+        <activity android:name=".activity.MsgSettingActivity" />
+        <activity android:name=".activity.WifiSetActivity" />
+
+        <activity android:name=".activity.WifiEditActivity"/>
     </application>
 
 </manifest>

@@ -131,7 +131,7 @@ public class HomeFragment extends BaseFragment {
     private boolean isExist = false;
 
     private void getDeviceList() {
-        loadingDia.show();
+//        loadingDia.show();
         Http.getDeviceList(getActivity(), new Http.OnListener() {
             @Override
             public void onSucc(Object object) {
@@ -231,7 +231,7 @@ public class HomeFragment extends BaseFragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         if (!hidden) {
-            loadingDia.show();
+//            loadingDia.show();
             getDeviceList();
         } else {
             if (loadingDia != null) {
@@ -279,7 +279,7 @@ public class HomeFragment extends BaseFragment {
                 tvCarName.setText(carName);
                 tvCarNum.setText(deviceListInfo.getArr().get(position).getCarNum());
                 AppData.GetInstance(getActivity()).setSelectedDevice(Integer.parseInt(device_id));
-                loadingDia.show();
+//                loadingDia.show();
                 getHomeData(device_id);
             }
         });

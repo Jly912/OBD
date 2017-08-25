@@ -22,4 +22,5 @@
     <color name="orange1">#FFBB33</color>
     <color name="green">#99CC00</color>
     <color name="gray">#545454</color>
+    <color name="gray_btn">#dadce0</color>
 </resources>

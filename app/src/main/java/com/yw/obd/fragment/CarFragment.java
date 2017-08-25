@@ -16,6 +16,9 @@ import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -30,6 +33,8 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,6 +58,7 @@ import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.model.LatLng;
 import com.google.gson.Gson;
 import com.yw.obd.R;
+import com.yw.obd.activity.ElectricFenceActivity;
 import com.yw.obd.activity.TrackRecordActivity;
 import com.yw.obd.adapter.PopuLvAdapter;
 import com.yw.obd.base.BaseFragment;
@@ -70,22 +76,21 @@ import butterknife.Bind;
 import butterknife.OnClick;
 
 import static android.content.Context.SENSOR_SERVICE;
-import static com.yw.obd.R.string.address;
 
 
 /**
  * Created by apollo on 2017/7/25.
  */
 
-public class CarFragment extends BaseFragment implements SensorEventListener {
+public class CarFragment extends BaseFragment implements SensorEventListener, ActivityCompat.OnRequestPermissionsResultCallback {
     @Bind(R.id.iv_drop)
     ImageButton ivDrop;
     @Bind(R.id.map)
     MapView map;
     @Bind(R.id.iv_people)
-    ImageButton ivPeople;
+    RadioButton ivPeople;
     @Bind(R.id.iv_car)
-    ImageButton ivCar;
+    RadioButton ivCar;
     @Bind(R.id.iv_nav)
     ImageButton ivNav;
     @Bind(R.id.ll_car)
@@ -96,6 +101,9 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
     TextView tvCarName;
     @Bind(R.id.tv_car_number)
     TextView tvCarNum;
+    @Bind(R.id.rg_car)
+    RadioGroup rbCar;
+
     /*百度地图*/
     private BaiduMap baiduMap;
     private LocationClient mLocClient;
@@ -105,7 +113,6 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
     private TextView tvContent, tvStatus, tvLoc, tvVol, tvTime, tvDirect, tvSpeed, tvAd;
     private RelativeLayout rlContent;
     private Button btnCommand, btnLocus;
-    private BDLocation location;
 
     //定位相关
     private MyLocationListener myLocationListener = new MyLocationListener();
@@ -141,6 +148,20 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
     private ListView lv;
     private LinearLayout ll;
     private PopuLvAdapter adapter;
+    private Thread thread = null;
+//    private boolean isLoad=true;
+
+    //用于刷新数据
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (msg.what == 0) {
+                getDeviceList();
+            }
+        }
+    };
+
 
     public static CarFragment getInstance() {
         CarFragment carFragment = new CarFragment();
@@ -159,7 +180,7 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
                 .setCancelable(false)
                 .setView(inflate)
                 .create();
-        loadingDia.show();
+//        loadingDia.show();
 
         receiver = new MyBaiduSdkReceiver();
         IntentFilter intentFilter = new IntentFilter();
@@ -179,12 +200,49 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
         ll = (LinearLayout) popu.findViewById(R.id.ll_out);
         ll.setBackgroundColor(getResources().getColor(R.color.white));
 
+        rbCar.getChildAt(0).performClick();
+        ivPeople.setChecked(true);
+        lockM = true;
+
+        rbCar.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
+                switch (checkedId) {
+                    case R.id.iv_car:
+                        if (trackingInfo == null) {
+                            AppData.showToast(getActivity(), R.string.cant_get_data);
+                            return;
+                        }
+                        lockM = false;
+                        baiduMap.setMapStatus(MapStatusUpdateFactory.newLatLngZoom(latLng,
+                                baiduMap.getMapStatus().zoom < 12f ? 18 : baiduMap.getMapStatus().zoom));
+                        break;
+                    case R.id.iv_people:
+                        lockM = true;
+                        baiduMap.setMapStatus(MapStatusUpdateFactory.newLatLngZoom(new LatLng(mCurrentLat, mCurrentLon),
+                                baiduMap.getMapStatus().zoom < 12f ? 18 : baiduMap.getMapStatus().zoom));
+                        break;
+                }
+            }
+        });
+
+        thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(60000);
+                    mHandler.sendEmptyMessage(0);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     /**
      * 初始化弹窗
      */
-    private void initPop() {
+    private void initPop(TrackingInfo info, String add) {
         infoWindow = getActivity().getLayoutInflater().inflate(R.layout.main_info_window, null);
         tvContent = (TextView) infoWindow.findViewById(R.id.tv_content);
         tvAd = (TextView) infoWindow.findViewById(R.id.tv_ad);
@@ -197,12 +255,62 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
         rlContent = (RelativeLayout) infoWindow.findViewById(R.id.rl_content);
         btnCommand = (Button) infoWindow.findViewById(R.id.btn_command);
         btnLocus = (Button) infoWindow.findViewById(R.id.btn_locus);
-        tvAd.setText(getResources().getString(address));
+
+        if (info != null) {
+            String status = info.getStatus();
+            tvContent.setText(carName);
+            if (status.equals("1-")) {//运动
+                status = getResources().getString(R.string.sport);
+            } else if (status.equals("0-")) {//未启用
+                status = getResources().getString(R.string.unable);
+            } else if (status.equals("2-")) {//静止
+                status = getResources().getString(R.string.quiet);
+            } else if (status.equals("3-")) {//离线
+                status = getResources().getString(R.string.offline);
+            } else if (status.equals("4-")) {//欠费
+                status = getResources().getString(R.string.arrears);
+            }
+            tvStatus.setText(getResources().getString(R.string.status) + status);
+
+            String isGPS = info.getIsGPS();
+            if (isGPS.equals("0")) {
+                isGPS = getResources().getString(R.string.base_station);
+            } else if (isGPS.equals("1")) {
+                isGPS = getResources().getString(R.string.gps);
+            } else if (isGPS.equals("2")) {
+                isGPS = getResources().getString(R.string.wifi);
+            }
+
+            tvLoc.setText(getResources().getString(R.string.locate) + isGPS);
+
+            tvDirect.setText(getResources().getString(R.string.direct) + getResources().getString(
+                    CaseData.returnCourse(Integer.parseInt(info.getCourse()))));
+
+            tvVol.setText(getResources().getString(R.string.voltage) + info.getDy() + "V");
+
+            tvSpeed.setText(getResources().getString(R.string.speed) + info.getSpeed() + "km/h");
+
+            tvTime.setText(getResources().getString(R.string.time) + "：" + info.getPositionTime());
+            tvAd.setText(getResources().getString(R.string.address) + add);
+
+            mInfoWindow = new InfoWindow(infoWindow, latLng, -47);
+            baiduMap.showInfoWindow(mInfoWindow);
+
+            lockM = false;
+            ivPeople.setChecked(false);
+            ivCar.setChecked(true);
+            // 将地图移到到最后一个经纬度位置
+            MapStatusUpdate u = MapStatusUpdateFactory.newLatLng(latLng);
+            baiduMap.setMapStatus(u);
+        }
 
         btnCommand.setOnClickListener(new View.OnClickListener() {//命令
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(getActivity(), ElectricFenceActivity.class);
+                if (deviceListInfo != null) {
+                    getActivity().startActivity(intent);
+                }
             }
         });
 
@@ -221,52 +329,56 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
     private boolean isExist = false;
 
     private void getDeviceList() {
-        Http.getDeviceList(getActivity(), new Http.OnListener() {
-            @Override
-            public void onSucc(Object object) {
+        Http.getDeviceList(
 
-                String res = (String) object;
-                try {
-                    JSONObject jsonObject = new JSONObject(res);
-                    int state = Integer.parseInt(jsonObject.getString("state"));
-                    switch (state) {
-                        case 0:
-                            deviceListInfo = new Gson().fromJson(res, DeviceListInfo.class);
-                            int selectedDevice = AppData.GetInstance(getActivity()).getSelectedDevice();
-                            for (int i = 0; i < deviceListInfo.getArr().size(); i++) {
-                                if (deviceListInfo.getArr().get(i).getId().equals(selectedDevice + "")) {
-                                    device_id = deviceListInfo.getArr().get(i).getId();
-                                    carName = deviceListInfo.getArr().get(i).getName();
-                                    tvCarName.setText(carName);
-                                    tvCarNum.setText(deviceListInfo.getArr().get(i).getCarNum());
-                                    loadingDia.show();
-                                    getDeviceTracking(deviceListInfo.getArr().get(i).getId());
-                                    isExist = true;
-                                    return;
-                                }
-                            }
+                getActivity(), new Http.OnListener()
 
-                            if (!isExist) {
-                                device_id = deviceListInfo.getArr().get(0).getId();
-                                carName = deviceListInfo.getArr().get(0).getName();
-                                tvCarName.setText(carName);
-                                tvCarNum.setText(deviceListInfo.getArr().get(0).getCarNum());
-                                loadingDia.show();
-                                getDeviceTracking(deviceListInfo.getArr().get(0).getId());
+                {
+                    @Override
+                    public void onSucc(Object object) {
+
+                        String res = (String) object;
+                        try {
+                            JSONObject jsonObject = new JSONObject(res);
+                            int state = Integer.parseInt(jsonObject.getString("state"));
+                            switch (state) {
+                                case 0:
+                                    deviceListInfo = new Gson().fromJson(res, DeviceListInfo.class);
+                                    int selectedDevice = AppData.GetInstance(getActivity()).getSelectedDevice();
+                                    for (int i = 0; i < deviceListInfo.getArr().size(); i++) {
+                                        if (deviceListInfo.getArr().get(i).getId().equals(selectedDevice + "")) {
+                                            device_id = deviceListInfo.getArr().get(i).getId();
+                                            carName = deviceListInfo.getArr().get(i).getName();
+                                            tvCarName.setText(carName);
+                                            tvCarNum.setText(deviceListInfo.getArr().get(i).getCarNum());
+//                                            loadingDia.show();
+                                            getDeviceTracking(deviceListInfo.getArr().get(i).getId());
+                                            isExist = true;
+                                            return;
+                                        }
+                                    }
+
+                                    if (!isExist) {
+                                        device_id = deviceListInfo.getArr().get(0).getId();
+                                        carName = deviceListInfo.getArr().get(0).getName();
+                                        tvCarName.setText(carName);
+                                        tvCarNum.setText(deviceListInfo.getArr().get(0).getCarNum());
+//                                        loadingDia.show();
+                                        getDeviceTracking(deviceListInfo.getArr().get(0).getId());
+                                    }
+                                    break;
+                                case 2002:
+                                    if (loadingDia != null && loadingDia.isShowing()) {
+                                        loadingDia.dismiss();
+                                    }
+                                    AppData.showToast(getActivity(), R.string.no_msg);
+                                    break;
                             }
-                            break;
-                        case 2002:
-                            if (loadingDia != null && loadingDia.isShowing()) {
-                                loadingDia.dismiss();
-                            }
-                            AppData.showToast(getActivity(), R.string.no_msg);
-                            break;
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+                });
     }
 
     private String add = "";
@@ -295,17 +407,18 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
                                 @Override
                                 public void onSucc(Object object) {
                                     add = (String) object;
-                                    tvAd.setText(getResources().getString(R.string.address) + add);
-
+                                    initPop(trackingInfo, add);
                                 }
                             });
-                            showInfoWindow(trackingInfo, latLng);
-                            Log.e("print", "lockM" + lockM + latLng + "_--" + mCurrentLat + "__-" + mCurrentLon);
                             if (lockM) {
+                                ivPeople.setChecked(true);
+                                ivCar.setChecked(false);
                                 // 将地图移到到最后一个经纬度位置
                                 MapStatusUpdate u = MapStatusUpdateFactory.newLatLng(new LatLng(mCurrentLat, mCurrentLon));
                                 baiduMap.setMapStatus(u);
                             } else {
+                                ivCar.setChecked(true);
+                                ivPeople.setChecked(false);
                                 // 将地图移到到最后一个经纬度位置
                                 MapStatusUpdate u = MapStatusUpdateFactory.newLatLng(latLng);
                                 baiduMap.setMapStatus(u);
@@ -327,93 +440,50 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if (Build.VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT >= 23) {//如果sdk为6.0及以上，检查权限
             if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED
                     || ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {//未授权
-                if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                    getActivity().shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION);
-                } else {
-                    //申请WRITE_EXTERNAL_STORAGE权限
-                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
-                            Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_COARSE_LOCATION_REQUEST_CODE);
-                }
-                setMap();
-            } else {
+                    != PackageManager.PERMISSION_GRANTED) {//未授权//返回DENIED申请授权
+//                if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+//                    //如果返回true表示上次已经拒绝，google官方做法，弹出一个弹窗告诉用户为啥要申请这个权限
+//                    new AlertDialog.Builder(getActivity())
+//                            .setTitle(R.string.promote)
+//                            .setMessage(R.string.location_dialog)
+//                            .setPositiveButton(R.string.confirm, null).setNegativeButton(R.string.cancel, null).show();
+//                }
+                //申请定位权限
+                requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_COARSE_LOCATION_REQUEST_CODE);
+            } else {//已经申请
                 setMap();
             }
-        } else {
+        } else {//6.0以下，直接设置地图
             setMap();
         }
-
-
         getDeviceList();
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == ACCESS_COARSE_LOCATION_REQUEST_CODE) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission Granted
+                // Permission Granted，授权成功，设置地图
                 setMap();
-            } else {
+            } else {//授权失败
                 AppData.showToast(getActivity(), getResources().getString(R.string.refuse_enter));
             }
         }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    @OnClick({R.id.iv_people, R.id.iv_car, R.id.iv_nav, R.id.ll_car})
+    @OnClick({R.id.iv_nav, R.id.ll_car})
     public void onViewClicked(View view) {
         switch (view.getId()) {
-            case R.id.iv_people:
-//                Log.e("print", "myListener" + myLocationListener.getLocation());
-//                if (null == myLocationListener.getLocation().getAddrStr()) {
-//                    if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)
-//                            == PackageManager.PERMISSION_DENIED
-//                            || ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
-//                            == PackageManager.PERMISSION_DENIED) {
-//
-//                        if (Build.VERSION.SDK_INT >= 23) {
-//                            Log.e("print", "-----denied=---");
-//                            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)) {
-//
-//                                Log.e("print", "-----denied=--222-");
-//                                getActivity().shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION);
-//                            } else {
-//                                //申请WRITE_EXTERNAL_STORAGE权限
-//                                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
-//                                        Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_COARSE_LOCATION_REQUEST_CODE);
-//                            }
-//                            setMap();
-//                        }
-//                    } else {
-//                        setMap();
-//                    }
-//                }
-                if (trackingInfo == null) {
-                    return;
-                }
-                lockM = true;
-                baiduMap.setMapStatus(MapStatusUpdateFactory.newLatLngZoom(new LatLng(mCurrentLat, mCurrentLon),
-                        baiduMap.getMapStatus().zoom < 12f ? 18 : baiduMap.getMapStatus().zoom));
-                ivPeople.setImageResource(R.drawable.btn_people_checked);
-                ivCar.setImageResource(R.drawable.btn_car_normal);
-                break;
-            case R.id.iv_car:
-                if (trackingInfo == null) {
-                    return;
-                }
-                lockM = false;
-                baiduMap.setMapStatus(MapStatusUpdateFactory.newLatLngZoom(latLng,
-                        baiduMap.getMapStatus().zoom < 12f ? 18 : baiduMap.getMapStatus().zoom));
-                ivPeople.setImageResource(R.drawable.btn_people_normal);
-                ivCar.setImageResource(R.drawable.btn_car_checked);
-                break;
             case R.id.iv_nav://跳转到百度地图导航
                 if (trackingInfo == null) {
+                    AppData.showToast(getActivity(), R.string.cant_get_data);
                     return;
                 }
                 try {
@@ -468,7 +538,7 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
                 tvCarName.setText(carName);
                 tvCarNum.setText(deviceListInfo.getArr().get(position).getCarNum());
                 AppData.GetInstance(getActivity()).setSelectedDevice(Integer.parseInt(device_id));
-                loadingDia.show();
+//                loadingDia.show();
                 getDeviceTracking(deviceListInfo.getArr().get(position).getId());
 
             }
@@ -476,7 +546,6 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
     }
 
     private void setMap() {
-        initPop();
         //开启定位图层
         baiduMap.setMyLocationEnabled(true);
         //定位初始化
@@ -509,69 +578,29 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
 
     }
 
-    private void showInfoWindow(TrackingInfo info, LatLng latLng) {
-        if (info != null) {
-            String status = info.getStatus();
-            tvContent.setText(carName);
-            if (status.equals("1-")) {//运动
-                status = getResources().getString(R.string.sport);
-            } else if (status.equals("0-")) {//未启用
-                status = getResources().getString(R.string.unable);
-            } else if (status.equals("2-")) {//静止
-                status = getResources().getString(R.string.quiet);
-            } else if (status.equals("3-")) {//离线
-                status = getResources().getString(R.string.offline);
-            } else if (status.equals("4-")) {//欠费
-                status = getResources().getString(R.string.arrears);
-            }
-            tvStatus.setText(getResources().getString(R.string.status) + status);
-
-            String isGPS = info.getIsGPS();
-            if (isGPS.equals("0")) {
-                isGPS = getResources().getString(R.string.base_station);
-            } else if (isGPS.equals("1")) {
-                isGPS = getResources().getString(R.string.gps);
-            } else if (isGPS.equals("2")) {
-                isGPS = getResources().getString(R.string.wifi);
-            }
-
-            tvLoc.setText(getResources().getString(R.string.locate) + isGPS);
-
-            tvDirect.setText(getResources().getString(R.string.direct) + getResources().getString(
-                    CaseData.returnCourse(Integer.parseInt(info.getCourse()))));
-
-            tvVol.setText(getResources().getString(R.string.voltage) + info.getDy() + "V");
-
-            tvSpeed.setText(getResources().getString(R.string.speed) + info.getSpeed() + "km/h");
-
-            tvTime.setText(getResources().getString(R.string.time) + "：" + info.getPositionTime());
-
-            mInfoWindow = new InfoWindow(infoWindow, latLng, -47);
-            baiduMap.showInfoWindow(mInfoWindow);
-
-            // 将地图移到到最后一个经纬度位置
-            MapStatusUpdate u = MapStatusUpdateFactory.newLatLng(latLng);
-            lockM = false;
-            ivCar.setPressed(true);
-            ivCar.setFocusable(true);
-            baiduMap.setMapStatus(u);
-        }
-    }
-
     /**
      * 定位SDK监听函数, 需实现BDLocationListener里的方法
      */
     public class MyLocationListener implements BDLocationListener {
 
-        private BDLocation location;
-
-        public BDLocation getLocation() {
-            return this.location;
-        }
+        private Handler handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                if (msg.what == 0) {
+                    Bundle data = msg.getData();
+                    LatLng latLng = data.getParcelable("locate");
+                    //描述地图状态将要发生的变化
+                    // //描述地图状态将要发生的变化,通过当前经纬度来使地图显示到该位置
+//                    LatLng ll = new LatLng(mCurrentLat, mCurrentLon);
+                    MapStatusUpdate msu = MapStatusUpdateFactory.newLatLng(latLng);
+                    //改变地图状态
+                    baiduMap.animateMapStatus(msu);
+                }
+            }
+        };
 
         @Override
         public void onReceiveLocation(BDLocation location) {
-            this.location = location;
             // map view 销毁后不在处理新接收的位置
             if (location == null || map == null) {
                 return;
@@ -591,13 +620,22 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
             baiduMap.setMyLocationData(locData);
 
             if (isFirstLoc) {
+                //首次拒绝定位申请之后再同意会报错 所以采用handler更改地图状态
+//                LatLng ll = new LatLng(mCurrentLat, mCurrentLon);
+//                MapStatusUpdate msu = MapStatusUpdateFactory.newLatLng(ll);
+//                //改变地图状态
+//                baiduMap.animateMapStatus(msu);
+
                 isFirstLoc = false;
-                //描述地图状态将要发生的变化
-                // //描述地图状态将要发生的变化,通过当前经纬度来使地图显示到该位置
-                LatLng ll = new LatLng(mCurrentLat, mCurrentLon);
-                MapStatusUpdate msu = MapStatusUpdateFactory.newLatLng(ll);
-                //改变地图状态
-                baiduMap.animateMapStatus(msu);
+                if (!lockM) {
+                    return;
+                }
+                Message message = Message.obtain();
+                message.what = 0;
+                Bundle bundle = new Bundle();
+                bundle.putParcelable("locate", new LatLng(mCurrentLat, mCurrentLon));
+                message.setData(bundle);
+                handler.sendMessage(message);
             }
 
         }
@@ -606,6 +644,7 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
         public void onConnectHotSpotMessage(String var1, int var2) {
         }
     }
+
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -662,10 +701,13 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
 
     @Override
     public void onDestroy() {
-        //退出时销毁定位
-        mLocClient.stop();
-        //关闭定位图层
-        baiduMap.setMyLocationEnabled(false);
+        if (mLocClient != null) {
+            //退出时销毁定位
+            mLocClient.stop();
+            //关闭定位图层
+            baiduMap.setMyLocationEnabled(false);
+        }
+
         map.onDestroy();
         map = null;
         getActivity().unregisterReceiver(receiver);
@@ -681,6 +723,7 @@ public class CarFragment extends BaseFragment implements SensorEventListener {
             if (loadingDia != null) {
                 loadingDia.dismiss();
             }
+
         }
     }
 

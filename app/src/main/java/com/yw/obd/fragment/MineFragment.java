@@ -19,6 +19,7 @@ import com.yw.obd.activity.FeedbackActivity;
 import com.yw.obd.activity.MyCarActivity;
 import com.yw.obd.activity.OilActivity;
 import com.yw.obd.activity.PersonalActivity;
+import com.yw.obd.activity.SettingActivity;
 import com.yw.obd.base.BaseFragment;
 import com.yw.obd.entity.DeviceListInfo;
 import com.yw.obd.entity.UserInfo;
@@ -152,7 +153,7 @@ public class MineFragment extends BaseFragment {
     }
 
     @OnClick({R.id.rl_user, R.id.iv_icon, R.id.iv_name_more, R.id.iv_car_more, R.id.ll_car, R.id.iv_report_more, R.id.ll_report, R.id.iv_question_more, R.id.ll_question, R.id.iv_pwd_more, R.id.ll_pwd, R.id.iv_about_more,
-            R.id.ll_about, R.id.iv_feedback_more, R.id.ll_feedback, R.id.iv_oil_more, R.id.ll_oil, R.id.tv_right})
+            R.id.ll_about, R.id.iv_feedback_more, R.id.ll_feedback, R.id.iv_oil_more, R.id.ll_oil, R.id.tv_right, R.id.ll_setting, R.id.iv_setting_more})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.rl_user:
@@ -192,6 +193,10 @@ public class MineFragment extends BaseFragment {
             case R.id.ll_feedback:
                 getActivity().startActivity(new Intent(getActivity(), FeedbackActivity.class));
                 break;
+            case R.id.ll_setting:
+            case R.id.iv_setting_more:
+                getActivity().startActivity(new Intent(getActivity(), SettingActivity.class));
+                break;
             case R.id.tv_right:
                 new AlertDialog.Builder(getActivity())
                         .setTitle(R.string.app_name)
@@ -200,7 +205,8 @@ public class MineFragment extends BaseFragment {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
-                                getActivity().finish();
+                                android.os.Process.killProcess(android.os.Process.myPid());
+//                                getActivity().finish();
                             }
                         }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override

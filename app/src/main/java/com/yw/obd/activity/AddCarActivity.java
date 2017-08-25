@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -90,6 +91,7 @@ public class AddCarActivity extends BaseActivity implements WebService.WebServic
     private String gearbox = "";
     private String displacement = "";
     private String type = "";
+    private AlertDialog loadingDia;
 
     @Override
     protected int getLayoutId() {
@@ -103,7 +105,11 @@ public class AddCarActivity extends BaseActivity implements WebService.WebServic
 
         type = getIntent().getStringExtra("type");
         Log.d("print", "----" + type);
-
+        View inflate = LayoutInflater.from(this).inflate(R.layout.progressdialog, null);
+        loadingDia = new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setView(inflate)
+                .create();
     }
 
     @OnClick({R.id.iv_car_brand_more, R.id.ll_car_brand, R.id.iv_car_type_more, R.id.ll_car_type, R.id.iv_model_year_more, R.id.ll_model_year, R.id.btn_submit, R.id.iv_back})
@@ -143,6 +149,7 @@ public class AddCarActivity extends BaseActivity implements WebService.WebServic
 
     private void addCar(String sn, String carNum, String carBrand, String carModel,
                         String carYear, String carGBox, String carOutput, String carDis, String carVIN) {
+        loadingDia.show();
         WebService web = new WebService(this, ADD_CAR, false, "AddDevice");
         HashMap<String, Object> property = new HashMap<>();
         property.put("loginName", AppData.GetInstance(this).getUserName());
@@ -162,6 +169,7 @@ public class AddCarActivity extends BaseActivity implements WebService.WebServic
     }
 
     private void getCarBrandInfo(int typeID, int method, String carId) {
+        loadingDia.show();
         WebService web = new WebService(this, method, false, "GetCarBrandInfo");
         HashMap<String, Object> property = new HashMap<>();
         property.put("typeID", typeID);
@@ -174,6 +182,9 @@ public class AddCarActivity extends BaseActivity implements WebService.WebServic
     @Override
     public void onWebServiceReceive(String method, int id, String result) {
         try {
+            if (loadingDia != null && loadingDia.isShowing()) {
+                loadingDia.dismiss();
+            }
             JSONObject jo = new JSONObject(result);
             if (id == GET_CAR_BRAND) { //获得车辆品牌信息
                 int status = Integer.parseInt(jo.getString("status"));
@@ -364,5 +375,14 @@ public class AddCarActivity extends BaseActivity implements WebService.WebServic
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (loadingDia != null) {
+            loadingDia.dismiss();
+            loadingDia = null;
+        }
+        super.onDestroy();
     }
 }

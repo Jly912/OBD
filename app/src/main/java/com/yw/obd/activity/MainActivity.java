@@ -99,7 +99,8 @@ public class MainActivity extends BaseActivity implements RadioGroup.OnCheckedCh
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
-                            MainActivity.this.finish();
+//                            MainActivity.this.finish();
+                            android.os.Process.killProcess(android.os.Process.myPid());
                         }
                     }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                 @Override

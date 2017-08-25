@@ -40,26 +40,6 @@
                     android:textSize="14sp" />
             </LinearLayout>
 
-            <ImageButton
-                android:id="@+id/iv_drop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:background="@null"
-                android:padding="5dp"
-                android:src="@drawable/btn_dropdown_normal"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/tv_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="@string/oil"
-                android:textColor="@color/white"
-                android:textSize="20sp"
-                android:visibility="gone" />
-
             <TextView
                 android:id="@+id/tv_rank"
                 android:layout_width="wrap_content"
@@ -69,14 +49,13 @@
                 android:text="@string/rank"
                 android:textColor="@color/btn_blue" />
 
-
             <TextView
                 android:id="@+id/tv_detail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="10dp"
+                android:paddingRight="10dp"
                 android:text="@string/detail_data"
                 android:textColor="@color/btn_blue" />
         </RelativeLayout>
@@ -146,8 +125,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="200dp"
                             android:layout_below="@+id/v1"
-                            android:layout_margin="10dp"
-                            android:padding="15dp" />
+                            android:layout_margin="10dp" />
 
 
                     </RelativeLayout>
@@ -190,8 +168,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="200dp"
                             android:layout_below="@+id/v2"
-                            android:layout_margin="10dp"
-                            />
+                            android:layout_margin="10dp" />
 
                     </RelativeLayout>
 
@@ -233,8 +210,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="200dp"
                             android:layout_below="@+id/v3"
-                            android:layout_marginLeft="25dp"
-                            android:layout_marginRight="10dp" />
+                            android:layout_margin="10dp" />
 
 
                     </RelativeLayout>

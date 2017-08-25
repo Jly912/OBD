@@ -1,0 +1,5 @@
+<selector  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/zoomout_disable" android:state_enabled="false"></item>
+    <item android:drawable="@drawable/zoomout_press" android:state_pressed="true"></item>
+    <item android:drawable="@drawable/zoomout_normal"></item>
+</selector>

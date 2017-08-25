@@ -94,7 +94,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/selector_btn_transparent"
-            android:text="@string/locus"
+            android:text="@string/history_traces"
             android:textColor="@color/shape_gray" />
 
         <Button
@@ -113,7 +113,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/selector_btn_transparent"
-            android:text="@string/command"
+            android:text="@string/electric_fence"
             android:textColor="@color/shape_gray" />
     </LinearLayout>
 
