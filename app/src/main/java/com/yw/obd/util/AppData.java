@@ -256,4 +256,13 @@ public class AppData {
     public void setLastID(String lastID) {
         sp.edit().putString("LastID", lastID).commit();
     }
+
+
+    public String getSN() {
+        return sp.getString("SN", "");
+    }
+
+    public void setSN(String SN) {
+        sp.edit().putString("SN", SN).commit();
+    }
 }

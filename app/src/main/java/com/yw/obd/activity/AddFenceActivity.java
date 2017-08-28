@@ -1,5 +1,6 @@
 package com.yw.obd.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -17,19 +18,31 @@ import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationData;
+import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.model.LatLng;
+import com.google.gson.Gson;
 import com.yw.obd.R;
 import com.yw.obd.app.AppContext;
 import com.yw.obd.base.BaseActivity;
+import com.yw.obd.entity.TrackingInfo;
+import com.yw.obd.http.Http;
 import com.yw.obd.util.AppData;
+import com.yw.obd.util.CaseData;
 import com.yw.obd.widget.RingView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import butterknife.Bind;
 import butterknife.OnClick;
+
+import static com.yw.obd.R.id.seekBar_Radius;
 
 /**
  * Created by apollo on 2017/8/24.
@@ -47,7 +60,7 @@ public class AddFenceActivity extends BaseActivity {
     ImageButton btnPerson;
     @Bind(R.id.btn_car)
     ImageButton btnCar;
-    @Bind(R.id.seekBar_Radius)
+    @Bind(seekBar_Radius)
     SeekBar seekBarRadius;
     @Bind(R.id.btn_reduce)
     Button btnReduce;
@@ -61,15 +74,25 @@ public class AddFenceActivity extends BaseActivity {
     MapView map;
     @Bind(R.id.rl_map)
     RelativeLayout rlMap;
+    @Bind(R.id.btn_zoom_in)
+    ImageButton btnZoomIn;
+    @Bind(R.id.btn_zoom_out)
+    ImageButton btnZoomOut;
 
     private LocationClient mLocClient;
     private BaiduMap mBaiduMap;
     private boolean isFirstLoc = true;
+    private boolean isFirstRequest = true;
     private MyLocationListener myLocationListenner = new MyLocationListener();
-    private LatLng location_person;
+    private LatLng location_person, location_device;
     private boolean start;
     private RingView ringView;
     private float zoom;
+    private int geofenceId = 0;
+    private double lat, lng;
+    private int location_type = 0;
+    private TrackingInfo trackingInfo;
+    private boolean isNew = true;
 
     /**
      * 定位SDK监听函数
@@ -119,11 +142,43 @@ public class AddFenceActivity extends BaseActivity {
     @Override
     protected void init() {
         ivBack.setVisibility(View.VISIBLE);
-        tvTitle.setText(R.string.add_electric_fence);
+        Intent intent = getIntent();
+        isNew = intent.getBooleanExtra("new", true);
+        if (!isNew) {//编辑
+            tvTitle.setText(R.string.edit_electric_fence);
+            String fenceName = intent.getStringExtra("name");
+            String fenceId = intent.getStringExtra("fenceId");
+            String lat = intent.getStringExtra("lat");
+            String lng = intent.getStringExtra("lng");
+            if (!TextUtils.isEmpty(lat)) {
+                this.lat = Double.parseDouble(lat);
+            }
+
+            if (!TextUtils.isEmpty(lng)) {
+                this.lng = Double.parseDouble(lng);
+            }
+
+            if (TextUtils.isEmpty(fenceId)) {
+                this.geofenceId = 0;
+            } else {
+                this.geofenceId = Integer.parseInt(fenceId);
+            }
+
+            etName.setText(fenceName);
+            etName.setSelection(fenceName.length());
+        } else {//新增
+            tvTitle.setText(R.string.add_electric_fence);
+        }
+
+        if (intent.getStringExtra("radius") != null && intent.getStringExtra("radius").length() > 0)
+            seekBarRadius.setProgress((int) (Double.parseDouble(intent.getStringExtra("radius")) / 100 - 1));
+
 
         if (mBaiduMap == null) {
             mBaiduMap = map.getMap();
         }
+        map.showScaleControl(true);
+        map.showZoomControls(false);
 
         ringView = new RingView(this);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
@@ -137,6 +192,21 @@ public class AddFenceActivity extends BaseActivity {
         mBaiduMap.setMyLocationEnabled(true);
         mLocClient = new LocationClient(AppContext.getContext());
         mLocClient.registerLocationListener(myLocationListenner);
+
+        if (lat != 0 && lng != 0) {
+            isFirstLoc = false;
+            isFirstRequest = false;
+            isNew = false;
+            LatLng latLng = new LatLng(lat, lng);
+            MapStatus.Builder builder = new MapStatus.Builder();
+            builder.target(latLng)
+                    .zoom(16.0f);
+            mBaiduMap.setMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+        } else {
+            MapStatus.Builder builder = new MapStatus.Builder();
+            builder.target(new LatLng(35.915, 112.4035)).zoom(5.0f);
+            mBaiduMap.setMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+        }
 
         //定位初始化
         LocationClientOption option = new LocationClientOption();
@@ -163,7 +233,6 @@ public class AddFenceActivity extends BaseActivity {
 
             }
         });
-
         mBaiduMap.setOnMapLoadedCallback(new BaiduMap.OnMapLoadedCallback() {
 
             @Override
@@ -172,17 +241,112 @@ public class AddFenceActivity extends BaseActivity {
             }
 
         });
+        mBaiduMap.setOnMapStatusChangeListener(new BaiduMap.OnMapStatusChangeListener() {
+            @Override
+            public void onMapStatusChangeStart(MapStatus mapStatus) {
+            }
+
+            @Override
+            public void onMapStatusChange(MapStatus mapStatus) {
+                if (zoom != mBaiduMap.getMapStatus().zoom) {
+                    setRadius();
+                }
+            }
+
+            @Override
+            public void onMapStatusChangeFinish(MapStatus mapStatus) {
+                LatLng l = new LatLng(
+                        (mapStatus.bound.northeast.latitude + mapStatus.bound.southwest.latitude) / 2,
+                        (mapStatus.bound.northeast.longitude + mapStatus.bound.southwest.longitude) / 2);
+                if (location_type == 1) {
+                    if (location_person != null && (l.latitude != location_person.latitude || l.longitude != location_person.longitude)) {
+                        MapStatus.Builder builder = new MapStatus.Builder();
+                        builder.target(location_person);
+                        mBaiduMap.setMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+                    }
+                } else if (location_type == 2) {
+                    if (location_device != null && (l.latitude != location_device.latitude || l.longitude != location_device.longitude)) {
+                        MapStatus.Builder builder = new MapStatus.Builder();
+                        builder.target(location_device);
+                        mBaiduMap.setMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+                    }
+                }
+            }
+        });
+
+        getTracking();
     }
 
-    @OnClick({R.id.btn_person, R.id.btn_car, R.id.btn_reduce, R.id.btn_increase, R.id.btn_submit, R.id.iv_back})
+    private void getTracking() {
+        Http.getTracking(this, AppData.GetInstance(this).getSelectedDevice() + "", new Http.OnListener() {
+            @Override
+            public void onSucc(Object object) {
+                String res = (String) object;
+                try {
+                    int state = Integer.parseInt(new JSONObject(res).getString("state"));
+                    switch (state) {
+                        case 0:
+                            trackingInfo = new Gson().fromJson(res, TrackingInfo.class);
+                            mBaiduMap.clear();
+                            location_device = new LatLng(Double.parseDouble(trackingInfo.getLat()), Double.parseDouble(trackingInfo.getLng()));
+                            String status = trackingInfo.getStatus();
+                            String[] split = status.split("-");
+                            int i = CaseData.returnIconInt(Integer.parseInt(trackingInfo.getCourse()), Integer.parseInt(split[0]));
+                            OverlayOptions options = new MarkerOptions().position(location_device).icon(BitmapDescriptorFactory.fromResource(i)).zIndex(5);
+                            mBaiduMap.addOverlay(options);
+                            if (isNew) {
+                                MapStatus.Builder builder = new MapStatus.Builder();
+                                builder.target(location_device).zoom(16.0f);
+                                mBaiduMap.setMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+                            }
+
+                            break;
+                        case 2002:
+                            AppData.showToast(AddFenceActivity.this, R.string.no_msg);
+                            break;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    @OnClick({R.id.btn_person, R.id.btn_car, R.id.btn_reduce, R.id.btn_increase, R.id.btn_submit, R.id.iv_back, R.id.btn_zoom_in, R.id.btn_zoom_out})
     public void onViewClicked(View view) {
         switch (view.getId()) {
+            case R.id.btn_zoom_in:
+                mBaiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(mBaiduMap
+                        .getMapStatus().zoom + 1));
+                if (mBaiduMap.getMapStatus().zoom >= mBaiduMap.getMaxZoomLevel()) {
+                    btnZoomIn.setEnabled(false);
+                    btnZoomOut.setEnabled(true);
+                }
+                break;
+            case R.id.btn_zoom_out:
+                mBaiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(mBaiduMap
+                        .getMapStatus().zoom - 1));
+                if (mBaiduMap.getMapStatus().zoom <= mBaiduMap.getMinZoomLevel()) {
+                    btnZoomOut.setEnabled(false);
+                    btnZoomIn.setEnabled(true);
+                }
+                break;
             case R.id.iv_back:
                 finish();
                 break;
             case R.id.btn_person:
+                if (location_person != null) {
+                    MapStatus.Builder builder = new MapStatus.Builder();
+                    builder.target(location_person).zoom(16.0f);
+                    mBaiduMap.setMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+                }
                 break;
             case R.id.btn_car:
+                if (location_person != null) {
+                    MapStatus.Builder builder = new MapStatus.Builder();
+                    builder.target(location_device).zoom(16.0f);
+                    mBaiduMap.setMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+                }
                 break;
             case R.id.btn_reduce:
                 if (seekBarRadius.getProgress() > 0) {
@@ -220,9 +384,26 @@ public class AddFenceActivity extends BaseActivity {
                 }
 
                 Log.d("print", "经度" + lat + "纬度" + lng + "半径" + radius);
-
+                saveFence(AppData.GetInstance(this).getSelectedDevice() + "", fenceName, "", lat + "", lng + "", radius + "", geofenceId + "");
                 break;
         }
+    }
+
+    private void saveFence(String deviceId, String fenceName, String remark, String lat, String lng, String radius, String geofenceId) {
+        Http.saveFence(this, deviceId, fenceName, remark, lat, lng, radius, geofenceId, new Http.OnListener() {
+            @Override
+            public void onSucc(Object object) {
+                if (object != null) {
+                    String res = (String) object;
+                    if (res.equals("0")) {
+                        AppData.showToast(AddFenceActivity.this, R.string.savefailed);
+                    } else {
+                        AppData.showToast(AddFenceActivity.this, R.string.saveSucess);
+                        finish();
+                    }
+                }
+            }
+        });
     }
 
     private void setRadius() {
@@ -247,7 +428,6 @@ public class AddFenceActivity extends BaseActivity {
                 (rlMap.getWidth() - lp.width) / 2,
                 (rlMap.getHeight() - lp.height) / 2);
     }
-
 
     public static double Distance(double lat1, double long1, double lat2,
                                   double long2) {

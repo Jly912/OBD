@@ -245,6 +245,7 @@
     <string name="beyoardNowMonth">您选择的时间超过本月</string>
     <string name="add_ele">添加</string>
     <string name="add_electric_fence">添加电子栅栏</string>
+    <string name="edit_electric_fence">编辑电子围栏</string>
     <string name="fence_name">名称</string>
     <string name="refer">提交</string>
     <string name="lat">经度</string>
@@ -271,4 +272,18 @@
     <string name="radius_error">围栏半径输入错误</string>
     <string name="saveSucess">保存成功</string>
     <string name="savefailed">保存失败</string>
+    <string name="sure_to_delete">你确定要删除这项吗?</string>
+    <string name="deleteSuccess">删除成功</string>
+    <string name="deleteFailed">删除失败</string>
+
+    <string name="deleteElectronic">删除电子围栏</string>
+    <string name="device_notexist">设备不存在</string>
+    <string name="device_offline">设备不在线</string>
+    <string name="command_send_failed">有异常</string>
+    <string name="commandsave">指令已经保存</string>
+    <string name="commandsendwaitresponse">等待设备应答</string>
+    <string name="commandsendsuccess">命令发送成功</string>
+    <string name="commandsendtimeout">命令发送超时</string>
+    <string name="setSucc">设置成功</string>
+    <string name="setFail">设置失败</string>
 </resources>

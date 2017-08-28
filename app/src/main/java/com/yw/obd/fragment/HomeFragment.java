@@ -160,6 +160,7 @@ public class HomeFragment extends BaseFragment {
                                     carName = deviceListInfo.getArr().get(i).getName();
                                     tvCarName.setText(carName);
                                     tvCarNum.setText(deviceListInfo.getArr().get(i).getCarNum());
+                                    AppData.GetInstance(getActivity()).setSN(deviceListInfo.getArr().get(i).getSn());
                                     isExist = true;
                                     getHomeData(device_id);
                                     break;
@@ -173,6 +174,7 @@ public class HomeFragment extends BaseFragment {
                                 tvCarName.setText(carName);
                                 tvCarNum.setText(deviceListInfo.getArr().get(0).getCarNum());
                                 AppData.GetInstance(getActivity()).setSelectedDevice(Integer.parseInt(device_id));
+                                AppData.GetInstance(getActivity()).setSN(deviceListInfo.getArr().get(0).getSn());
                                 getHomeData(device_id);
                             }
 
@@ -279,6 +281,7 @@ public class HomeFragment extends BaseFragment {
                 tvCarName.setText(carName);
                 tvCarNum.setText(deviceListInfo.getArr().get(position).getCarNum());
                 AppData.GetInstance(getActivity()).setSelectedDevice(Integer.parseInt(device_id));
+                AppData.GetInstance(getActivity()).setSN(deviceListInfo.getArr().get(position).getSn());
 //                loadingDia.show();
                 getHomeData(device_id);
             }

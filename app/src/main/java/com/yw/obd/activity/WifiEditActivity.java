@@ -1,5 +1,6 @@
 package com.yw.obd.activity;
 
+import android.content.Intent;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -42,6 +43,20 @@ public class WifiEditActivity extends BaseActivity {
     protected void init() {
         ivBack.setVisibility(View.VISIBLE);
         tvTitle.setText(R.string.wifi_setting);
+
+        Intent intent = getIntent();
+        String name = intent.getStringExtra("name");
+        String sn = intent.getStringExtra("sn");
+        String pwd = intent.getStringExtra("pwd");
+        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(sn) || TextUtils.isEmpty(pwd)) {
+            return;
+        }
+        etWifiName.setText(name);
+        etWifiName.setSelection(name.length());
+        etWifiPwd.setText(pwd);
+        etWifiPwd.setSelection(pwd.length());
+        etSn.setText(sn);
+        etSn.setText(sn.length());
     }
 
 

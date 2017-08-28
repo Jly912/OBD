@@ -351,6 +351,7 @@ public class CarFragment extends BaseFragment implements SensorEventListener, Ac
                                             carName = deviceListInfo.getArr().get(i).getName();
                                             tvCarName.setText(carName);
                                             tvCarNum.setText(deviceListInfo.getArr().get(i).getCarNum());
+                                            AppData.GetInstance(getActivity()).setSN(deviceListInfo.getArr().get(i).getSn());
 //                                            loadingDia.show();
                                             getDeviceTracking(deviceListInfo.getArr().get(i).getId());
                                             isExist = true;
@@ -363,6 +364,8 @@ public class CarFragment extends BaseFragment implements SensorEventListener, Ac
                                         carName = deviceListInfo.getArr().get(0).getName();
                                         tvCarName.setText(carName);
                                         tvCarNum.setText(deviceListInfo.getArr().get(0).getCarNum());
+                                        AppData.GetInstance(getActivity()).setSelectedDevice(Integer.parseInt(device_id));
+                                        AppData.GetInstance(getActivity()).setSN(deviceListInfo.getArr().get(0).getSn());
 //                                        loadingDia.show();
                                         getDeviceTracking(deviceListInfo.getArr().get(0).getId());
                                     }

@@ -216,6 +216,7 @@ public class FuelFragment extends BaseFragment {
                 tvCarName.setText(carName);
                 tvCarNum.setText(deviceListInfo.getArr().get(position).getCarNum());
                 AppData.GetInstance(getActivity()).setSelectedDevice(Integer.parseInt(device_id));
+                AppData.GetInstance(getActivity()).setSN(deviceListInfo.getArr().get(position).getSn());
                 getOil(deviceListInfo.getArr().get(position).getId());
 
             }
@@ -244,6 +245,7 @@ public class FuelFragment extends BaseFragment {
                                     carName = deviceListInfo.getArr().get(i).getName();
                                     tvCarName.setText(carName);
                                     tvCarNum.setText(deviceListInfo.getArr().get(i).getCarNum());
+                                    AppData.GetInstance(getActivity()).setSN(deviceListInfo.getArr().get(i).getSn());
                                     getOil(deviceListInfo.getArr().get(i).getId());
                                     isExist = true;
                                     return;
@@ -255,6 +257,8 @@ public class FuelFragment extends BaseFragment {
                                 carName = deviceListInfo.getArr().get(0).getName();
                                 tvCarName.setText(carName);
                                 tvCarNum.setText(deviceListInfo.getArr().get(0).getCarNum());
+                                AppData.GetInstance(getActivity()).setSelectedDevice(Integer.parseInt(device_id));
+                                AppData.GetInstance(getActivity()).setSN(deviceListInfo.getArr().get(0).getSn());
                                 getOil(deviceListInfo.getArr().get(0).getId());
                             }
 
@@ -601,7 +605,7 @@ public class FuelFragment extends BaseFragment {
         }
     }
 
-    @OnClick({ R.id.tv_rank, R.id.tv_detail, R.id.ll_car})
+    @OnClick({R.id.tv_rank, R.id.tv_detail, R.id.ll_car})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tv_rank:

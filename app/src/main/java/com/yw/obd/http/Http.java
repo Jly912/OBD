@@ -38,6 +38,10 @@ public class Http {
     private static final int UPDATE_PWD = 0x013;
     private static final int FORGET_PWD = 0x014;
     private static final int FEEDBACK = 0x015;
+    private static final int GET_FENCE_LIST = 0X016;
+    private static final int SAVE_FENCE = 0X017;
+    private static final int DEL_FENCE = 0X018;
+    private static final int GET_WIFI_SET = 0x019;
     private static final String KEY = "20170801CHLOBDYW028M";
 
     /**
@@ -720,6 +724,125 @@ public class Http {
                 }
             }
         });
+        web.SyncGet(property);
+    }
+
+    /**
+     * 获得栅栏信息
+     *
+     * @param context
+     * @param deviceId
+     * @param listener
+     */
+    public static void getFenceList(Context context, String deviceId, final OnListener listener) {
+        WebService web = new WebService(context, GET_FENCE_LIST, false, "GetGeofenceList");
+        HashMap<String, Object> property = new HashMap<>();
+        property.put("loginName", AppData.GetInstance(context).getUserName());
+        property.put("password", AppData.GetInstance(context).getUserPass());
+        property.put("deviceID", deviceId);
+        property.put("timeZones", AppData.GetInstance(context).getTimeZone());
+        property.put("mapType", "Baidu");
+        property.put("key", KEY);
+        web.addWebServiceListener(new WebService.WebServiceListener() {
+            @Override
+            public void onWebServiceReceive(String method, int id, String result) {
+                if (listener != null) {
+                    listener.onSucc(result);
+                }
+            }
+        });
+
+        web.SyncGet(property);
+    }
+
+    /**
+     * 保存或编辑栅栏
+     *
+     * @param context
+     * @param deviceId
+     * @param fenceName
+     * @param remark
+     * @param lat
+     * @param lng
+     * @param radius
+     * @param geofenceID
+     * @param listener
+     */
+    public static void saveFence(Context context, String deviceId, String fenceName, String remark, String lat, String lng, String radius, String geofenceID, final OnListener listener) {
+        WebService web = new WebService(context, SAVE_FENCE, false, "SaveGeofence");
+        HashMap<String, Object> property = new HashMap<>();
+        property.put("loginName", AppData.GetInstance(context).getUserName());
+        property.put("password", AppData.GetInstance(context).getUserPass());
+        property.put("deviceID", deviceId);
+        property.put("geofenceName", fenceName);
+        property.put("remark", remark);
+        property.put("lat", String.valueOf(lat));
+        property.put("lng", String.valueOf(lng));
+        property.put("radius", String.valueOf(radius));
+        property.put("geofenceID", geofenceID);
+        property.put("mapType", "Baidu");
+        property.put("key", KEY);
+        web.addWebServiceListener(new WebService.WebServiceListener() {
+            @Override
+            public void onWebServiceReceive(String method, int id, String result) {
+                if (listener != null) {
+                    listener.onSucc(result);
+                }
+            }
+        });
+
+        web.SyncGet(property);
+    }
+
+    /**
+     * 删除栅栏
+     *
+     * @param context
+     * @param fenceId
+     * @param deviceId
+     * @param listener
+     */
+    public static void delFence(Context context, String fenceId, String deviceId, final OnListener listener) {
+        WebService web = new WebService(context, DEL_FENCE, false, "DelGeofence");
+        HashMap<String, Object> property = new HashMap<>();
+        property.put("loginName", AppData.GetInstance(context).getUserName());
+        property.put("password", AppData.GetInstance(context).getUserPass());
+        property.put("deviceID", deviceId);
+        property.put("geofenceID", fenceId);
+        property.put("key", KEY);
+        web.addWebServiceListener(new WebService.WebServiceListener() {
+            @Override
+            public void onWebServiceReceive(String method, int id, String result) {
+                if (listener != null) {
+                    listener.onSucc(result);
+                }
+            }
+        });
+
+        web.SyncGet(property);
+    }
+
+    /**
+     * 获得wifi热点状态
+     *
+     * @param context
+     * @param deviceId
+     * @param listener
+     */
+    public static void getDeviceSetInfo(Context context, String deviceId, final OnListener listener) {
+        WebService web = new WebService(context, GET_WIFI_SET, false, "GetDeviceSetInfo");
+        HashMap<String, Object> property = new HashMap<>();
+        property.put("deviceID", deviceId);
+        property.put("key", KEY);
+        web.addWebServiceListener(new WebService.WebServiceListener() {
+            @Override
+            public void onWebServiceReceive(String method, int id, String result) {
+                if (listener != null) {
+                    listener.onSucc(result);
+                }
+            }
+        });
+
         web.SyncGet(property);
     }
 

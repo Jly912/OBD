@@ -50,6 +50,15 @@ public class DeviceListInfo {
         private String id;
         private String name;
         private String carNum;
+        private String sn;
+
+        public String getSn() {
+            return sn;
+        }
+
+        public void setSn(String sn) {
+            this.sn = sn;
+        }
 
         public String getId() {
             return id;
@@ -81,6 +90,7 @@ public class DeviceListInfo {
                     "id='" + id + '\'' +
                     ", name='" + name + '\'' +
                     ", carNum='" + carNum + '\'' +
+                    ", sn='" + sn + '\'' +
                     '}';
         }
     }

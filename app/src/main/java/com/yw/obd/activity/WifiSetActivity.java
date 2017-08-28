@@ -3,6 +3,8 @@ package com.yw.obd.activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -13,6 +15,11 @@ import android.widget.TextView;
 
 import com.yw.obd.R;
 import com.yw.obd.base.BaseActivity;
+import com.yw.obd.http.Http;
+import com.yw.obd.util.AppData;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import butterknife.Bind;
 import butterknife.OnClick;
@@ -39,6 +46,11 @@ public class WifiSetActivity extends BaseActivity {
     @Bind(R.id.btnSet)
     Button btnSet;
 
+    private String status = "";
+    private String name = "";
+    private String pwd = "";
+    private String sn = "";
+
     @Override
     protected int getLayoutId() {
         return R.layout.activity_wifi_set_1;
@@ -48,13 +60,16 @@ public class WifiSetActivity extends BaseActivity {
     protected void init() {
         ivBack.setVisibility(View.VISIBLE);
         tvTitle.setText(R.string.wifi_setting);
-
+        sn = AppData.GetInstance(this).getSN();
+        Log.e("print", "sn---" + sn);
+        tvSN.setText(sn);
         cbWifi.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
             }
         });
+        getWifiSetInfo();
     }
 
     @OnClick({R.id.iv_back, R.id.btnReset, R.id.btnSet})
@@ -79,8 +94,49 @@ public class WifiSetActivity extends BaseActivity {
                 }).show();
                 break;
             case R.id.btnSet:
-                startActivity(new Intent(this, WifiEditActivity.class));
+                Intent intent = new Intent(this, WifiEditActivity.class);
+                if (TextUtils.isEmpty(name) || TextUtils.isEmpty(sn) || TextUtils.isEmpty(pwd)) {
+                    return;
+                }
+                intent.putExtra("sn", sn);
+                intent.putExtra("name", name);
+                intent.putExtra("pwd", pwd);
+                startActivity(intent);
                 break;
         }
+    }
+
+    private void getWifiSetInfo() {
+        Http.getDeviceSetInfo(this, AppData.GetInstance(this).getSelectedDevice() + "", new Http.OnListener() {
+            @Override
+            public void onSucc(Object object) {
+                if (object != null) {
+                    String res = (String) object;
+                    try {
+                        JSONObject jsonObject = new JSONObject(res);
+                        int state = jsonObject.getInt("state");
+                        switch (state) {
+                            case 0:
+                                String wifi = jsonObject.getString("wifi");
+                                String[] split = wifi.split(",");
+                                status = split[1];
+                                name = split[2];
+                                pwd = split[3];
+                                if (status.equals("1")) {
+                                    cbWifi.setChecked(true);
+                                } else {
+                                    cbWifi.setChecked(false);
+                                }
+                                break;
+                            case 2002:
+                                cbWifi.setChecked(false);
+                                break;
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 }
