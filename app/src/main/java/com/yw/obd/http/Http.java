@@ -42,6 +42,9 @@ public class Http {
     private static final int SAVE_FENCE = 0X017;
     private static final int DEL_FENCE = 0X018;
     private static final int GET_WIFI_SET = 0x019;
+    private static final int GET_SET_WARN = 0x020;
+    private static final int SET_WARN = 0X021;
+    private static final int GET_RESPONSE = 0X022;
     private static final String KEY = "20170801CHLOBDYW028M";
 
     /**
@@ -656,12 +659,12 @@ public class Http {
         HashMap<String, Object> property = new HashMap<>();
         property.put("loginName", AppData.GetInstance(context).getUserName());
         property.put("password", AppData.GetInstance(context).getUserPass());
-        property.put("Key", KEY);
-        property.put("DeviceID", deviceId);
-        property.put("CommandType", commandType);
-        property.put("Model", model);
-        property.put("Paramter", paramter);
-        property.put("SN", sn);
+        property.put("key", KEY);
+        property.put("deviceID", deviceId);
+        property.put("commandType", commandType);
+        property.put("model", model);
+        property.put("paramter", paramter);
+        property.put("sn", sn);
         web.addWebServiceListener(new WebService.WebServiceListener() {
             @Override
             public void onWebServiceReceive(String method, int id, String result) {
@@ -832,6 +835,8 @@ public class Http {
     public static void getDeviceSetInfo(Context context, String deviceId, final OnListener listener) {
         WebService web = new WebService(context, GET_WIFI_SET, false, "GetDeviceSetInfo");
         HashMap<String, Object> property = new HashMap<>();
+        property.put("loginName", AppData.GetInstance(context).getUserName());
+        property.put("password", AppData.GetInstance(context).getUserPass());
         property.put("deviceID", deviceId);
         property.put("key", KEY);
         web.addWebServiceListener(new WebService.WebServiceListener() {
@@ -844,6 +849,90 @@ public class Http {
         });
 
         web.SyncGet(property);
+    }
+
+    /**
+     * 消息设置
+     *
+     * @param context
+     * @param deviceId
+     * @param typeID   0为用户ID，1为设备ID
+     * @param warStr
+     * @param listener
+     */
+    public static void setWarn(Context context, String deviceId, String typeID, String warStr, final OnListener listener) {
+        WebService web = new WebService(context, SET_WARN, false, "SetWarn");
+        HashMap<String, Object> property = new HashMap<>();
+        property.put("loginName", AppData.GetInstance(context).getUserName());
+        property.put("password", AppData.GetInstance(context).getUserPass());
+        property.put("id", deviceId);
+        property.put("typeID", typeID);
+        property.put("warnStr", warStr);
+        property.put("key", KEY);
+        web.addWebServiceListener(new WebService.WebServiceListener() {
+            @Override
+            public void onWebServiceReceive(String method, int id, String result) {
+                Log.e("print", "--setWarn--" + result);
+                if (listener != null) {
+                    listener.onSucc(result);
+                }
+            }
+        });
+
+        web.SyncGet(property);
+    }
+
+    /**
+     * 获取wifi设置结果
+     *
+     * @param context
+     * @param deviceId
+     * @param typeId
+     * @param listener
+     */
+    public static void getSetWarn(Context context, String deviceId, String typeId, final OnListener listener) {
+        WebService web = new WebService(context, GET_SET_WARN, false, "GetSetWarn");
+        HashMap<String, Object> property = new HashMap<>();
+        property.put("loginName", AppData.GetInstance(context).getUserName());
+        property.put("password", AppData.GetInstance(context).getUserPass());
+        property.put("id", deviceId);
+        property.put("typeID", typeId);
+        property.put("key", KEY);
+        web.addWebServiceListener(new WebService.WebServiceListener() {
+            @Override
+            public void onWebServiceReceive(String method, int id, String result) {
+                if (listener != null) {
+                    listener.onSucc(result);
+                }
+            }
+        });
+        web.SyncGet(property);
+    }
+
+    /**
+     * 轮询获得WiFi设置的结果
+     * @param context
+     * @param commandId
+     * @param listener
+     */
+    public static void getResponse(Context context, int commandId, final OnListener listener) {
+        WebService web = new WebService(context, GET_RESPONSE, false, "GetResponse");
+        HashMap<String, Object> property = new HashMap<>();
+        property.put("loginName", AppData.GetInstance(context).getUserName());
+        property.put("password", AppData.GetInstance(context).getUserPass());
+        property.put("commandID", commandId);
+        property.put("timeZones", AppData.GetInstance(context).getTimeZone());
+        property.put("key", KEY);
+        web.addWebServiceListener(new WebService.WebServiceListener() {
+            @Override
+            public void onWebServiceReceive(String method, int id, String result) {
+                if (listener != null) {
+                    listener.onSucc(result);
+                }
+            }
+        });
+        web.SyncGet(property);
+
     }
 
     public interface OnListener {

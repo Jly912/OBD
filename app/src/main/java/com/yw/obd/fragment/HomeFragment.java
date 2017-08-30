@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -151,11 +150,9 @@ public class HomeFragment extends BaseFragment {
                         case 0:
                             deviceListInfo = new Gson().fromJson(res, DeviceListInfo.class);
                             int selectedDevice = AppData.GetInstance(getActivity()).getSelectedDevice();
-                            Log.e("print", "deviceSelectID" + selectedDevice);
                             for (int i = 0; i < deviceListInfo.getArr().size(); i++) {
 
                                 if (deviceListInfo.getArr().get(i).getId().equals(selectedDevice + "")) {
-                                    Log.e("print", "---存在--" + selectedDevice);
                                     device_id = deviceListInfo.getArr().get(i).getId();
                                     carName = deviceListInfo.getArr().get(i).getName();
                                     tvCarName.setText(carName);
@@ -168,7 +165,6 @@ public class HomeFragment extends BaseFragment {
                             }
 
                             if (!isExist) {
-                                Log.e("print", "---不存在--");
                                 device_id = deviceListInfo.getArr().get(0).getId();
                                 carName = deviceListInfo.getArr().get(0).getName();
                                 tvCarName.setText(carName);
@@ -178,8 +174,9 @@ public class HomeFragment extends BaseFragment {
                                 getHomeData(device_id);
                             }
 
-                            getActivity().startService(new Intent(getActivity(), PushService.class));
-
+                            if (AppData.GetInstance(getActivity()).getAlarmAlert()) {//开启
+                                getActivity().startService(new Intent(getActivity(), PushService.class));
+                            }
                             break;
                         case 2002:
                             if (loadingDia != null && loadingDia.isShowing()) {
@@ -252,6 +249,7 @@ public class HomeFragment extends BaseFragment {
             popupWindow = new PopupWindow(popu, width, height);
         }
 
+        adapter.notifyDataSetChanged();
         // 使其聚集
         popupWindow.setFocusable(true);
         // 设置允许在外点击消失
@@ -262,7 +260,6 @@ public class HomeFragment extends BaseFragment {
         // 显示的位置为:屏幕的宽度的一半-PopupWindow的高度的一半
         int xPos = windowManager.getDefaultDisplay().getWidth() / 2
                 - popupWindow.getWidth() / 2;
-        Log.i("print", "xPos:" + xPos);
 
         popupWindow.showAsDropDown(parent, xPos, 0);
 

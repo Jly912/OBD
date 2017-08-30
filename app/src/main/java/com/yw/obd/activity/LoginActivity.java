@@ -145,6 +145,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     private DeviceListInfo deviceListInfo;
+    private boolean isExist = false;
 
     private void getDeviceList() {
         Http.getDeviceList(this, new Http.OnListener() {
@@ -156,6 +157,23 @@ public class LoginActivity extends BaseActivity {
                     switch (state) {
                         case 0:
                             deviceListInfo = new Gson().fromJson(res, DeviceListInfo.class);
+                            int selectedDevice = AppData.GetInstance(LoginActivity.this).getSelectedDevice();
+                            for (int i = 0; i < deviceListInfo.getArr().size(); i++) {
+                                DeviceListInfo.ArrBean bean = deviceListInfo.getArr().get(i);
+                                String id = bean.getId();
+                                if (id.equals(selectedDevice + "")) {
+                                    isExist = true;
+                                    getWarnStr(id);
+                                    break;
+                                }
+                            }
+
+                            if (!isExist) {
+                                String id = deviceListInfo.getArr().get(0).getId();
+                                AppData.GetInstance(LoginActivity.this).setSelectedDevice(Integer.parseInt(id));
+                                getWarnStr(id);
+                            }
+
                             startActivity(new Intent(LoginActivity.this, MainActivity.class));
                             finish();
                             break;
@@ -170,6 +188,36 @@ public class LoginActivity extends BaseActivity {
                     e.printStackTrace();
                 }
 
+            }
+        });
+    }
+
+    private void getWarnStr(String deviceId) {
+        Http.getSetWarn(this, deviceId, "1", new Http.OnListener() {
+            @Override
+            public void onSucc(Object object) {
+                if (object != null) {
+                    String res = (String) object;
+                    try {
+                        JSONObject jsonObject = new JSONObject(res);
+                        int state = jsonObject.getInt("state");
+                        switch (state) {
+                            case 0:
+                                String warnStr = jsonObject.getString("warnSet");
+                                String[] split = warnStr.split("-");
+                                String msg = split[0];
+                                String voice = split[1];
+                                String vir = split[2];
+                                AppData.GetInstance(LoginActivity.this).setAlarmAlert(msg.equals("1") ? true : false);
+                                AppData.GetInstance(LoginActivity.this).setAlertVibration(vir.equals("1") ? true : false);
+                                AppData.GetInstance(LoginActivity.this).setAlertSound(voice.equals("1") ? true : false);
+                                break;
+
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         });
     }

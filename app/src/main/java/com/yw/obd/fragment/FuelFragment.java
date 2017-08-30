@@ -187,6 +187,7 @@ public class FuelFragment extends BaseFragment {
             popupWindow = new PopupWindow(popu, width, height);
         }
 
+        adapter.notifyDataSetChanged();
         // 使其聚集
         popupWindow.setFocusable(true);
         // 设置允许在外点击消失

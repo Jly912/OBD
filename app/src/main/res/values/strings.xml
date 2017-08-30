@@ -27,9 +27,9 @@
     <string name="rank">排名</string>
     <string name="detail_data">详细数据</string>
 
-    <string name="fuel_of_day">每日百公里油耗</string>
-    <string name="fuel_of_week">每周百公里油耗</string>
-    <string name="fuel_of_month">每月百公里油耗</string>
+    <string name="fuel_of_day">每日百公里油耗(L)</string>
+    <string name="fuel_of_week">每周百公里油耗(L)</string>
+    <string name="fuel_of_month">每月百公里油耗(L)</string>
 
     <string name="day_of_date">日期(日)</string>
     <string name="week_of_date">日期(周)</string>
@@ -286,4 +286,8 @@
     <string name="commandsendtimeout">命令发送超时</string>
     <string name="setSucc">设置成功</string>
     <string name="setFail">设置失败</string>
+    
+    <string name="clearCodeSucc">清除成功</string>
+    <string name="clearCodeFailed">清除失败</string>
+    <string name="clearCode">一键清码</string>
 </resources>

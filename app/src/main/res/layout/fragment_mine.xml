@@ -23,8 +23,8 @@
             <RelativeLayout
                 android:id="@+id/rl_user"
                 android:layout_width="match_parent"
-                android:background="@color/white"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:background="@color/white">
 
 
                 <de.hdodenhof.circleimageview.CircleImageView
@@ -78,8 +78,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:background="@color/white"
+                android:orientation="vertical"
                 android:padding="10dp">
 
                 <LinearLayout
@@ -190,8 +190,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:background="@color/white"
+                android:orientation="vertical"
                 android:padding="10dp">
 
                 <LinearLayout
@@ -259,11 +259,13 @@
                         android:padding="10dp"
                         android:src="@drawable/ic_right" />
                 </LinearLayout>
+
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="0.5dp"
                     android:layout_marginLeft="40dp"
                     android:background="@color/board_gray" />
+
                 <LinearLayout
                     android:id="@+id/ll_about"
                     android:layout_width="match_parent"
@@ -335,10 +337,11 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@color/white"
                 android:layout_marginBottom="40dp"
-                android:padding="10dp">
+                android:background="@color/white"
+                android:orientation="vertical"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp">
 
                 <LinearLayout
                     android:id="@+id/ll_setting"

@@ -92,6 +92,7 @@ public class AddCarActivity extends BaseActivity implements WebService.WebServic
     private String displacement = "";
     private String type = "";
     private AlertDialog loadingDia;
+    private String brand = "";
 
     @Override
     protected int getLayoutId() {
@@ -209,6 +210,13 @@ public class AddCarActivity extends BaseActivity implements WebService.WebServic
                             public void onClick(DialogInterface dialog, int which) {
                                 selectedCarBrand = carList.get(which).getId();
                                 carBrand = name.get(which);
+                                brand = tvCarBrand.getText().toString();
+                                if (!brand.equals(carBrand)) {
+                                    tvCarType.setText("");
+                                    tvModelYear.setText("");
+                                    tvGearCase.setText("");
+                                    tvDisplacement.setText("");
+                                }
                                 tvCarBrand.setText(carBrand);
                                 dialog.dismiss();
                             }

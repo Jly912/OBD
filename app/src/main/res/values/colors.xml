@@ -9,6 +9,7 @@
 
     <color name="text_black">#000</color>
     <color name="tab_bg">#2F333E</color>
+    <color name="tab">#282a30</color>
     <color name="board_gray">#D2D2D2</color>
     <color name="white">#FFFFFF</color>
     <color name="bg_gray">#f6f6f6</color>

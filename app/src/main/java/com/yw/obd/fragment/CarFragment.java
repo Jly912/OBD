@@ -103,6 +103,26 @@ public class CarFragment extends BaseFragment implements SensorEventListener, Ac
     TextView tvCarNum;
     @Bind(R.id.rg_car)
     RadioGroup rbCar;
+    @Bind(R.id.btn_zoom_in)
+    ImageButton btnZoomIn;
+    @Bind(R.id.btn_zoom_out)
+    ImageButton btnZoomOut;
+
+    @Bind(R.id.tvCarName)
+    TextView tvCarNameBottom;
+    @Bind(R.id.tvSpeed)
+    TextView tvSpeedBottom;
+    @Bind(R.id.tvLoc)
+    TextView tvLocBottom;
+    @Bind(R.id.tvStatus)
+    TextView tvStatusBottom;
+    @Bind(R.id.tvTime)
+    TextView tvTimeBottom;
+    @Bind(R.id.ll_fence)
+    LinearLayout llFence;
+    @Bind(R.id.ll_record)
+    LinearLayout llRecord;
+
 
     /*百度地图*/
     private BaiduMap baiduMap;
@@ -271,6 +291,7 @@ public class CarFragment extends BaseFragment implements SensorEventListener, Ac
                 status = getResources().getString(R.string.arrears);
             }
             tvStatus.setText(getResources().getString(R.string.status) + status);
+            tvStatusBottom.setText(status);
 
             String isGPS = info.getIsGPS();
             if (isGPS.equals("0")) {
@@ -282,6 +303,7 @@ public class CarFragment extends BaseFragment implements SensorEventListener, Ac
             }
 
             tvLoc.setText(getResources().getString(R.string.locate) + isGPS);
+            tvLocBottom.setText(isGPS);
 
             tvDirect.setText(getResources().getString(R.string.direct) + getResources().getString(
                     CaseData.returnCourse(Integer.parseInt(info.getCourse()))));
@@ -289,12 +311,14 @@ public class CarFragment extends BaseFragment implements SensorEventListener, Ac
             tvVol.setText(getResources().getString(R.string.voltage) + info.getDy() + "V");
 
             tvSpeed.setText(getResources().getString(R.string.speed) + info.getSpeed() + "km/h");
+            tvSpeedBottom.setText(info.getSpeed() + "km/h");
 
             tvTime.setText(getResources().getString(R.string.time) + "：" + info.getPositionTime());
+            tvTimeBottom.setText(info.getPositionTime());
             tvAd.setText(getResources().getString(R.string.address) + add);
 
             mInfoWindow = new InfoWindow(infoWindow, latLng, -47);
-            baiduMap.showInfoWindow(mInfoWindow);
+//            baiduMap.showInfoWindow(mInfoWindow);
 
             lockM = false;
             ivPeople.setChecked(false);
@@ -350,6 +374,7 @@ public class CarFragment extends BaseFragment implements SensorEventListener, Ac
                                             device_id = deviceListInfo.getArr().get(i).getId();
                                             carName = deviceListInfo.getArr().get(i).getName();
                                             tvCarName.setText(carName);
+                                            tvCarNameBottom.setText(carName);
                                             tvCarNum.setText(deviceListInfo.getArr().get(i).getCarNum());
                                             AppData.GetInstance(getActivity()).setSN(deviceListInfo.getArr().get(i).getSn());
 //                                            loadingDia.show();
@@ -363,6 +388,7 @@ public class CarFragment extends BaseFragment implements SensorEventListener, Ac
                                         device_id = deviceListInfo.getArr().get(0).getId();
                                         carName = deviceListInfo.getArr().get(0).getName();
                                         tvCarName.setText(carName);
+                                        tvCarNameBottom.setText(carName);
                                         tvCarNum.setText(deviceListInfo.getArr().get(0).getCarNum());
                                         AppData.GetInstance(getActivity()).setSelectedDevice(Integer.parseInt(device_id));
                                         AppData.GetInstance(getActivity()).setSN(deviceListInfo.getArr().get(0).getSn());
@@ -481,7 +507,7 @@ public class CarFragment extends BaseFragment implements SensorEventListener, Ac
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    @OnClick({R.id.iv_nav, R.id.ll_car})
+    @OnClick({R.id.iv_nav, R.id.ll_car, R.id.btn_zoom_in, R.id.btn_zoom_out, R.id.ll_fence, R.id.ll_record})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.iv_nav://跳转到百度地图导航
@@ -500,6 +526,34 @@ public class CarFragment extends BaseFragment implements SensorEventListener, Ac
             case R.id.ll_car:
                 showPopu(rl);
                 break;
+            case R.id.btn_zoom_in:
+                baiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(baiduMap
+                        .getMapStatus().zoom + 1));
+                if (baiduMap.getMapStatus().zoom >= baiduMap.getMaxZoomLevel()) {
+                    btnZoomIn.setEnabled(false);
+                    btnZoomOut.setEnabled(true);
+                }
+                break;
+            case R.id.btn_zoom_out:
+                baiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(baiduMap
+                        .getMapStatus().zoom - 1));
+                if (baiduMap.getMapStatus().zoom <= baiduMap.getMinZoomLevel()) {
+                    btnZoomOut.setEnabled(false);
+                    btnZoomIn.setEnabled(true);
+                }
+                break;
+            case R.id.ll_fence://电子栅栏
+                Intent intent = new Intent(getActivity(), ElectricFenceActivity.class);
+                if (deviceListInfo != null) {
+                    getActivity().startActivity(intent);
+                }
+                break;
+            case R.id.ll_record://轨迹记录
+                Intent intent1 = new Intent(getActivity(), TrackRecordActivity.class);
+                if (deviceListInfo != null) {
+                    getActivity().startActivity(intent1);
+                }
+                break;
         }
     }
 
@@ -512,6 +566,7 @@ public class CarFragment extends BaseFragment implements SensorEventListener, Ac
             popupWindow = new PopupWindow(popu, width, height);
         }
 
+        adapter.notifyDataSetChanged();
         // 使其聚集
         popupWindow.setFocusable(true);
         // 设置允许在外点击消失
@@ -539,6 +594,7 @@ public class CarFragment extends BaseFragment implements SensorEventListener, Ac
                 device_id = deviceListInfo.getArr().get(position).getId();
                 carName = deviceListInfo.getArr().get(position).getName();
                 tvCarName.setText(carName);
+                tvCarNameBottom.setText(carName);
                 tvCarNum.setText(deviceListInfo.getArr().get(position).getCarNum());
                 AppData.GetInstance(getActivity()).setSelectedDevice(Integer.parseInt(device_id));
 //                loadingDia.show();
@@ -560,7 +616,8 @@ public class CarFragment extends BaseFragment implements SensorEventListener, Ac
         option.setCoorType("bd09ll");//设置坐标类型
         option.setScanSpan(1000);
         option.setIsNeedAddress(true);
-
+        map.showScaleControl(true);
+        map.showZoomControls(false);
         mLocClient.setLocOption(option);
         mLocClient.start();
 

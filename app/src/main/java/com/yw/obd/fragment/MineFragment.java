@@ -149,6 +149,7 @@ public class MineFragment extends BaseFragment {
     protected void initView(View view) {
         tvTitle.setText(getResources().getString(R.string.mine));
         tvRight.setText(getResources().getString(R.string.exit));
+        tvRight.setTextColor(getResources().getColor(R.color.white));
         tvRight.setVisibility(View.VISIBLE);
     }
 

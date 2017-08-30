@@ -1,5 +1,10 @@
 package com.yw.obd.activity;
 
+import android.content.res.AssetManager;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -9,14 +14,19 @@ import android.view.animation.LayoutAnimationController;
 import android.view.animation.RotateAnimation;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.yw.obd.R;
 import com.yw.obd.adapter.CheckAdapter;
+import com.yw.obd.adapter.RyAdapter;
 import com.yw.obd.base.BaseActivity;
+import com.yw.obd.entity.ErrorCode;
 import com.yw.obd.http.Http;
 import com.yw.obd.util.AppData;
 import com.yw.obd.widget.BarView;
@@ -25,6 +35,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,12 +61,59 @@ public class CarCheckActivity extends BaseActivity {
     ListView lv;
     @Bind(R.id.tv_check)
     TextView tvCheck;
+    @Bind(R.id.ry)
+    RecyclerView ry;
+    @Bind(R.id.btn_Clear)
+    Button btnClear;
     private boolean isLoad = true;
     private int value = 0;
     private int total = 20;
     private RunThread runThread;
     private String id, name;
     private CheckAdapter adapter;
+    private RyAdapter adap;
+    private List<ErrorCode> err;
+    private boolean isRun;
+    private int itemNum;
+    private static final int MSG_RUN_ITEM = 0x00;
+    private static final int MSG_RUN_ADD = 0x01;
+    private static final int MSG_RUN_GONE = 0x02;
+    private int commandResponse;
+    private int getResponseTime = 0;
+
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (msg.what == MSG_RUN_ITEM) {
+                if (itemNum >= adap.getItemCount()) {
+                    ry.smoothScrollToPosition(adap.getItemCount() - 1);
+                } else {
+                    ry.smoothScrollToPosition(itemNum);
+                }
+            } else if (msg.what == MSG_RUN_ADD) {
+                Log.e("print", "----");
+//                adapter.addData(err);
+                ry.scrollToPosition(0);
+                if (itemNum >= adap.getItemCount()) {
+                    ry.smoothScrollToPosition(adap.getItemCount() - 1);
+                } else {
+                    ry.smoothScrollToPosition(itemNum);
+                }
+            } else if (msg.what == MSG_RUN_GONE) {
+                ry.setVisibility(View.GONE);
+            }
+        }
+    };
+
+    private Handler getResponseHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            getResponse(commandResponse);
+
+        }
+    };
 
     @Override
     protected int getLayoutId() {
@@ -67,10 +127,27 @@ public class CarCheckActivity extends BaseActivity {
         id = getIntent().getStringExtra("id");
         name = getIntent().getStringExtra("name");
         Log.e("print", "id" + id + "name" + name);
+        String json = initError();
+        TypeToken<List<ErrorCode>> tt = new TypeToken<List<ErrorCode>>() {
+        };
+        err = new Gson().fromJson(json, tt.getType());
         runThread = new RunThread();
-        startAnim();
-        runBar();
+        ry.setFocusable(false);
+    }
 
+    private String initError() {
+        AssetManager assets = getAssets();
+        StringBuilder stringBuilder = new StringBuilder();
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(assets.open("carCode.json")));
+            String line;
+            while ((line = br.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return stringBuilder.toString();
     }
 
     /**
@@ -92,12 +169,48 @@ public class CarCheckActivity extends BaseActivity {
     }
 
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (err != null) {
+            ry.setLayoutManager(new LinearLayoutManager(this));
+            adap = new RyAdapter(this);
+            adap.setData(err);
+            ry.setAdapter(adap);
+        }
+        isRun = true;
+        itemNum = 5;
+
+        startAnim();
+        runBar();
+    }
+
     /**
      * 循环运行bar
      */
     private void runBar() {
         runThread.start();
+        thread.start();
     }
+
+    Thread thread = new Thread() {
+        @Override
+        public void run() {
+            while (isRun) {
+                if (itemNum >= adap.getItemCount()) {
+                    handler.sendEmptyMessage(MSG_RUN_ADD);
+                } else {
+                    handler.sendEmptyMessage(MSG_RUN_ITEM);
+                }
+                try {
+                    Thread.sleep(120);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                itemNum += 5;
+            }
+        }
+    };
 
 
     class RunThread extends Thread {
@@ -111,9 +224,12 @@ public class CarCheckActivity extends BaseActivity {
                         bvBar.setVolume(value, total);
                         if (value == total) {
                             isLoad = false;
+                            isRun = false;
+                            handler.sendEmptyMessage(MSG_RUN_GONE);
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+                                    lv.setVisibility(View.VISIBLE);
                                     Http.checkCar(CarCheckActivity.this, id, new Http.OnListener() {
                                         @Override
                                         public void onSucc(Object object) {
@@ -192,9 +308,92 @@ public class CarCheckActivity extends BaseActivity {
         lv.setAdapter(adapter);
     }
 
-    @OnClick(R.id.iv_back)
-    public void onViewClicked() {
-        isLoad = false;
-        finish();
+    @OnClick({R.id.iv_back, R.id.btn_Clear})
+    public void onViewClicked(View v) {
+        switch (v.getId()) {
+            case R.id.iv_back:
+                isRun = false;
+                isLoad = false;
+                finish();
+                break;
+            case R.id.btn_Clear:
+                clearCode();
+                break;
+        }
+
+
+    }
+
+    private String commandType = "8415";
+
+    private void clearCode() {
+        Http.sendCommand(this, AppData.GetInstance(this).getSN(), AppData.GetInstance(this).getSelectedDevice() + "", commandType, 38 + "",
+                "", new Http.OnListener() {
+                    @Override
+                    public void onSucc(Object object) {
+                        if (object != null) {
+                            String res = (String) object;
+                            int state = Integer.parseInt(res);
+                            switch (state) {
+                                case -1:
+                                    AppData.showToast(CarCheckActivity.this, R.string.device_notexist);
+                                    break;
+                                case -2:
+                                    AppData.showToast(CarCheckActivity.this, R.string.device_offline);
+                                    break;
+                                case -3:
+                                    AppData.showToast(CarCheckActivity.this, R.string.command_send_failed);
+                                    break;
+                                case -5:
+                                    AppData.showToast(CarCheckActivity.this, R.string.commandsave);
+                                    break;
+                                default:
+                                    commandResponse = state;
+                                    AppData.showToast(CarCheckActivity.this, R.string.commandsendsuccess);
+                                    getResponse(commandResponse);
+                                    break;
+                            }
+
+                        }
+                    }
+                });
+    }
+
+    private void getResponse(int commandId) {
+        ++getResponseTime;
+        Http.getResponse(this, commandId, new Http.OnListener() {
+            @Override
+            public void onSucc(Object object) {
+                if (object != null) {
+                    String res = (String) object;
+                    try {
+                        JSONObject jsonObject = new JSONObject(res);
+                        int state = jsonObject.getInt("state");
+                        switch (state) {
+                            case 0:
+                                int isResponse = jsonObject.getInt("isResponse");
+                                String responseMsg = jsonObject.getString("responseMsg");
+                                if (isResponse == 0) {
+                                    if (getResponseTime < 3) {
+                                        getResponseHandler.sendEmptyMessageDelayed(0, 5000);
+                                    } else {
+                                        getResponseTime = 0;
+                                        AppData.showToast(CarCheckActivity.this, R.string.commandsendtimeout);
+                                    }
+
+                                } else if (isResponse == 1) {
+                                    AppData.showToast(CarCheckActivity.this, R.string.setSucc);
+                                    finish();
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 }

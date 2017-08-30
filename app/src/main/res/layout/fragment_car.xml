@@ -3,7 +3,7 @@
     android:id="@+id/actionbar"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/tool_color"
+    android:background="@color/tab"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -69,9 +69,10 @@
             android:clickable="true" />
 
         <LinearLayout
+            android:id="@+id/ll"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
+            android:layout_above="@+id/llBottom"
             android:layout_alignParentLeft="true"
             android:layout_marginBottom="20dp"
             android:layout_marginRight="10dp"
@@ -109,6 +110,33 @@
                 android:src="@drawable/selector_nav" />
 
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/llBottom"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@+id/ll"
+            android:layout_marginRight="10dp"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/btn_zoom_in"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/zoomin" />
+
+            <ImageButton
+                android:id="@+id/btn_zoom_out"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/zoomout" />
+
+
+        </LinearLayout>
+
+        <include layout="@layout/layout_car_bottom" />
     </RelativeLayout>
 
 </LinearLayout>

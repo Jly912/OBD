@@ -213,7 +213,7 @@ public class LocusActivity extends BaseActivity {
                             tvTurn.setText(historyTrackInfo.getTripSharp());
                             tvModerate.setText(historyTrackInfo.getTriDece());
 
-                            tvAveFuel.setText(historyTrackInfo.getTripFuelAvg() + "L");
+                            tvAveFuel.setText(historyTrackInfo.getTripFuelAvg() + "L/100KM");
                             tvAveSpeed.setText(historyTrackInfo.getTripSpeedAvg() + "km/h");
 
                             String timeMinute = historyTrackInfo.getTimeMinute();

@@ -53,6 +53,7 @@ public class ElectricFenceActivity extends BaseActivity {
     protected void init() {
         ivBack.setVisibility(View.VISIBLE);
         tvRight.setVisibility(View.VISIBLE);
+        tvRight.setTextColor(getResources().getColor(R.color.white));
         tvRight.setText(R.string.add_ele);
         tvTitle.setText(R.string.electric_fence);
 

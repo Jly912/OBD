@@ -122,7 +122,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                     // 部分机型的statusbar会有半透明的黑色背景
                     win.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
                     win.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-                    win.setStatusBarColor(getResources().getColor(R.color.tool_color));// SDK21
+                    win.setStatusBarColor(getResources().getColor(R.color.tab));// SDK21
 
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 

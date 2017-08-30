@@ -53,11 +53,41 @@
 
     </RelativeLayout>
 
-    <ListView
-        android:layout_marginTop="10dp"
-        android:background="@color/white"
-        android:id="@+id/lv"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp">
+
+        <ListView
+            android:id="@+id/lv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:layout_above="@+id/ll"
+            android:visibility="gone" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/ry"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white" />
+
+        <LinearLayout
+            android:id="@+id/ll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@color/white">
+
+            <Button
+                android:id="@+id/btn_Clear"
+                style="@style/ButtonStyle"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="0dp"
+                android:text="@string/clearCode" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
 
 </LinearLayout>
