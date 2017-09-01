@@ -3,6 +3,7 @@ package com.yw.obd.fragment;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,13 +17,16 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.HorizontalBarChart;
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
-import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.google.gson.Gson;
@@ -87,6 +91,9 @@ public class FuelFragment extends BaseFragment {
     TextView tvCarName;
     @Bind(R.id.tv_car_number)
     TextView tvCarNum;
+
+    @Bind(R.id.lChart)
+    LineChart lChart;
     private ColumnChartData columnChartData;
     private LineChartData lineChartData;
 
@@ -156,7 +163,9 @@ public class FuelFragment extends BaseFragment {
         for (int i = 0; i < 5; i++) {
             dd.add(0.0f);
         }
-        initLineChart(dd, 0);
+//        initLineChart(dd, 0);
+        dd.remove(0);
+        initLChart(dd);
 
         List<Float> mm = new ArrayList<>();
 
@@ -339,19 +348,20 @@ public class FuelFragment extends BaseFragment {
                             String oiLweek3 = oilInfo.getOILweek3();
                             String oiLweek4 = oilInfo.getOILweek4();
                             weekOils.clear();
-                            weekOils.add(0f);
                             weekOils.add(Float.parseFloat(oiLweek1));
                             weekOils.add(Float.parseFloat(oiLweek2));
                             weekOils.add(Float.parseFloat(oiLweek3));
                             weekOils.add(Float.parseFloat(oiLweek4));
+//                            weekOils.add(0f);
 
                             List<Integer> dat = new ArrayList<Integer>();
                             for (int i = 0; i < weekOils.size(); i++) {
                                 dat.add(weekOils.get(i).intValue());
                             }
 
-                            Log.e("print", "dat---" + dat + "===max" + Collections.max(dat));
-                            initLineChart(weekOils, (Collections.max(dat) / 10 + 1) * 10);
+//                            Log.e("print", "dat---" + dat + "===max" + Collections.max(dat));
+//                            initLineChart(weekOils, (Collections.max(dat) / 10 + 1) * 10);
+                            initLChart(weekOils);
 
                             //月数据
                             String oiLmonth1 = oilInfo.getOILmonth1();
@@ -392,6 +402,7 @@ public class FuelFragment extends BaseFragment {
     }
 
     private void initColumnChart(List<Float> data, List<Integer> xValues) {
+        columnChart.setZoomEnabled(false);//是否可以点击缩放
         //柱状图相关
         List<Column> columnList = new ArrayList<>();
         List<SubcolumnValue> subcolumnValues;
@@ -422,7 +433,12 @@ public class FuelFragment extends BaseFragment {
 
         //以上所有设置的数据、坐标配置都已存放到mColumnChartData中，接下来给mColumnChartView设置这些配置
         columnChart.setColumnChartData(columnChartData);
+
+        float max = Collections.max(data);
+
+        resetViewport(Math.round(max)+1);
     }
+
 
     private void initLineChart(List<Float> data, int top) {
         //折线图相关
@@ -524,7 +540,8 @@ public class FuelFragment extends BaseFragment {
         hBarChart.getDescription().setEnabled(false);
         // drawn
         hBarChart.setMaxVisibleValueCount(60);//设置Y轴左边的最大值
-        hBarChart.setPinchZoom(true);//是否横纵一起缩放
+        hBarChart.setSaveEnabled(false);
+//        hBarChart.setPinchZoom(true);//是否横纵一起缩放
         hBarChart.setDrawGridBackground(false);//是否画网格
         hBarChart.setNoDataText(getResources().getString(R.string.no_data));//设置图表没有数据时显示的数据
 
@@ -551,6 +568,7 @@ public class FuelFragment extends BaseFragment {
         xl.setGranularity(10f);
 
         YAxis yl = hBarChart.getAxisLeft();
+        hBarChart.getAxisLeft().setEnabled(false);
         yl.setTextSize(10f);
         yl.setDrawAxisLine(true);
         yl.setDrawGridLines(true);
@@ -559,16 +577,16 @@ public class FuelFragment extends BaseFragment {
 
         YAxis yr = hBarChart.getAxisRight();
         yr.setDrawAxisLine(true);
-        yr.setDrawGridLines(false);
+        yr.setDrawGridLines(true);
         yr.setAxisMinimum(0f); // this replaces setStartAtZero(true)
 
-        Legend l = hBarChart.getLegend();
-        l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
-        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
-        l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
-        l.setDrawInside(false);
-        l.setFormSize(8f);
-        l.setXEntrySpace(4f);
+//        Legend l = hBarChart.getLegend();
+//        l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+//        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
+//        l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+//        l.setDrawInside(false);
+//        l.setFormSize(8f);
+//        l.setXEntrySpace(4f);
 
         float barWidth = 5f;
         float spaceForBar = 10f;
@@ -593,6 +611,96 @@ public class FuelFragment extends BaseFragment {
         hBarChart.setData(ba);
         hBarChart.setFitBars(true);//如果设置为true，图表将避免第一个和最后一个标签条目被减掉在图表或屏幕的边缘
         hBarChart.invalidate();
+    }
+
+    private void initLChart(final List<Float> data) {
+        //x轴相关
+        weeks.clear();
+        weeks.add(getResources().getString(R.string.this_week));
+        weeks.add(getResources().getString(R.string.last_week));
+        weeks.add(getResources().getString(R.string.l_last_week));
+        weeks.add(getResources().getString(R.string.ll_last_week));
+
+        lChart.setBackgroundColor(Color.WHITE);
+
+        lChart.getAxisLeft().setAxisMinimum(0f);
+        lChart.getAxisLeft().setDrawGridLines(true);
+        lChart.getXAxis().setDrawGridLines(false);
+
+        YAxis leftAxis = lChart.getAxisLeft();
+        leftAxis.setTextSize(12f);
+        leftAxis.removeAllLimitLines(); // reset all limit lines to avoid overlapping lines
+        leftAxis.setTextColor(Color.DKGRAY);
+        leftAxis.setDrawZeroLine(true);
+
+        lChart.getAxisRight().setEnabled(false);
+        lChart.getDescription().setEnabled(false);
+        lChart.setScaleEnabled(false);
+
+        XAxis xAxis = lChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setTextSize(7f);
+        xAxis.setTextColor(Color.DKGRAY);
+        xAxis.setValueFormatter(new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                Log.e("print", "_---" + value);
+                if (value == 0.0) {
+                    return weeks.get(0);
+                } else if (value == 0.5 || value == 1.5 || value == 2.5) {
+                    return "";
+                } else if (value == 1.0) {
+                    return weeks.get(1);
+                } else if (value == 2.0) {
+                    return weeks.get(2);
+                } else if (value == 3.0) {
+                    return weeks.get(3);
+                }
+                return "";
+            }
+        });
+
+        // add data
+        setData(data.size(), data);
+//        lChart.animateXY(2000, 2000);
+        lChart.invalidate();
+    }
+
+    private void setData(int count, List<Float> data) {
+        ArrayList<Entry> yVals = new ArrayList<Entry>();
+
+        for (int i = 0; i < count; i++) {
+            yVals.add(new Entry(i, data.get(i)));
+        }
+
+        LineDataSet set1;
+
+        if (lChart.getData() != null &&
+                lChart.getData().getDataSetCount() > 0) {
+            set1 = (LineDataSet) lChart.getData().getDataSetByIndex(0);
+            set1.setValues(yVals);
+            lChart.getData().notifyDataChanged();
+            lChart.notifyDataSetChanged();
+        } else {
+            set1 = new LineDataSet(yVals, getResources().getString(R.string.coefficient));
+
+            set1.setMode(LineDataSet.Mode.LINEAR);
+            set1.setCubicIntensity(0.2f);
+            set1.setDrawCircleHole(false);
+            set1.setDrawCircles(true);
+            set1.setLineWidth(1.8f);
+            set1.setCircleRadius(5f);
+            set1.setCircleColor(getResources().getColor(R.color.orange1));
+            set1.setColor(getResources().getColor(R.color.orange1));
+            set1.setDrawHorizontalHighlightIndicator(false);
+            // create a data object with the datasets
+            LineData data1 = new LineData(set1);
+            data1.setValueTextSize(9f);
+            data1.setDrawValues(false);
+
+            // set data
+            lChart.setData(data1);
+        }
     }
 
     @Override

@@ -25,39 +25,39 @@ public class CaseData {
 			}
 		} else if(statusInt == 1) {
 			if (angle>=0&&angle<=22.5||angle>337.5) {
-				ID = R.drawable.driving_0;
+				ID = R.drawable.move_0;
 			}else if (angle>22.5&&angle<=67.5) {
-				ID = R.drawable.driving_45;
+				ID = R.drawable.move_45;
 			}else if (angle>67.5&&angle<=112.5) {
-				ID = R.drawable.driving_90;
+				ID = R.drawable.move_90;
 			}else if (angle>112.5&&angle<=157.5) {
-				ID = R.drawable.driving_135;
+				ID = R.drawable.move_135;
 			}else if (angle>157.5&&angle<=202.5) {
-				ID = R.drawable.driving_180;
+				ID = R.drawable.move_180;
 			}else if (angle>202.5&&angle<=247.5) {
-				ID = R.drawable.driving_225;
+				ID = R.drawable.move_225;
 			}else if (angle>247.5&angle<=292.5) {
-				ID = R.drawable.driving_270;
+				ID = R.drawable.move_270;
 			}else {
-				ID = R.drawable.driving_315;
+				ID = R.drawable.move_315;
 			}
 		}else  {
 			if (angle>=0&&angle<=22.5||angle>337.5) {
-				ID = R.drawable.online_0;
+				ID = R.drawable.still_0;
 			}else if (angle>22.5&&angle<=67.5) {
-				ID = R.drawable.online_45;
+				ID = R.drawable.still_45;
 			}else if (angle>67.5&&angle<=112.5) {
-				ID = R.drawable.online_90;
+				ID = R.drawable.still_90;
 			}else if (angle>112.5&&angle<=157.5) {
-				ID = R.drawable.online_135;
+				ID = R.drawable.still_135;
 			}else if (angle>157.5&&angle<=202.5) {
-				ID = R.drawable.online_180;
+				ID = R.drawable.still_180;
 			}else if (angle>202.5&&angle<=247.5) {
-				ID = R.drawable.online_225;
+				ID = R.drawable.still_225;
 			}else if (angle>247.5&angle<=292.5) {
-				ID = R.drawable.online_270;
+				ID = R.drawable.still_270;
 			}else {
-				ID = R.drawable.online_315;
+				ID = R.drawable.still_315;
 			}
 		}
 		return ID;

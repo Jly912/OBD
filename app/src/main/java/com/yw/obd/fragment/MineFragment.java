@@ -20,6 +20,7 @@ import com.yw.obd.activity.MyCarActivity;
 import com.yw.obd.activity.OilActivity;
 import com.yw.obd.activity.PersonalActivity;
 import com.yw.obd.activity.SettingActivity;
+import com.yw.obd.app.AppContext;
 import com.yw.obd.base.BaseFragment;
 import com.yw.obd.entity.DeviceListInfo;
 import com.yw.obd.entity.UserInfo;
@@ -206,6 +207,9 @@ public class MineFragment extends BaseFragment {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
+                                if (AppData.GetInstance(getActivity()).getUserName().equals("888")) {
+                                    AppData.GetInstance(getActivity()).clearSP(AppContext.getContext());
+                                }
                                 android.os.Process.killProcess(android.os.Process.myPid());
 //                                getActivity().finish();
                             }

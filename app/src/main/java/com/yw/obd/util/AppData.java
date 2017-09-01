@@ -23,6 +23,15 @@ public class AppData {
         sp = content.getSharedPreferences("config", Context.MODE_PRIVATE);
     }
 
+    public void clearSP(Context context) {
+        if (AppContext.getContext() != null)
+            context = AppContext.getContext();
+        sp = context.getSharedPreferences("config", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.clear();
+        editor.commit();
+    }
+
     public static void showToast(Context context, @StringRes int id) {
         Toast.makeText(context, id, Toast.LENGTH_SHORT).show();
     }

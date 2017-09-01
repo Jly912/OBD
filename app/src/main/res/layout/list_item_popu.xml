@@ -13,7 +13,7 @@
         android:layout_gravity="center"
         android:gravity="center"
         android:textColor="@color/white"
-        android:textSize="16sp" />
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/tv_car_number"
@@ -22,6 +22,6 @@
         android:layout_gravity="center"
         android:gravity="center"
         android:textColor="@color/shape_gray"
-        android:textSize="14sp" />
+        android:textSize="12sp" />
 
 </LinearLayout>

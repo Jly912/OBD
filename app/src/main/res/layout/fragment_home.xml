@@ -1,71 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/actionbar"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_home_normal"
     android:orientation="vertical">
 
-    <RelativeLayout
-        android:id="@+id/rl"
+    <LinearLayout
+        android:id="@+id/actionbar"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@color/tab"
-        android:gravity="center_vertical">
+        android:layout_height="wrap_content"
+        android:background="@color/tab">
 
-        <LinearLayout
-            android:id="@+id/ll_car"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:gravity="center"
-            android:orientation="vertical">
+        <RelativeLayout
+            android:id="@+id/rl"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/tv_car"
+            <LinearLayout
+                android:id="@+id/ll_car"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:textSize="16sp" />
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tv_car_number"
+                <TextView
+                    android:id="@+id/tv_car"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/tv_car_number"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/shape_gray"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+
+            <ImageButton
+                android:id="@+id/iv_alarm"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/shape_gray"
-                android:textSize="14sp" />
-        </LinearLayout>
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="@null"
+                android:padding="5dp"
+                android:src="@drawable/ic_alarm_title_normal" />
 
-        <ImageButton
-            android:id="@+id/iv_drop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:background="@null"
-            android:padding="5dp"
-            android:src="@drawable/btn_dropdown_normal"
-            android:visibility="gone" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="@string/home"
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            android:visibility="gone" />
-
-        <ImageButton
-            android:id="@+id/iv_alarm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:background="@null"
-            android:padding="5dp"
-            android:src="@drawable/ic_alarm_title_normal" />
-
-    </RelativeLayout>
+        </RelativeLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -107,7 +94,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="40dp"
+            android:layout_marginRight="10dp"
+            android:layout_toLeftOf="@+id/iv_engine"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -134,17 +122,17 @@
             android:id="@+id/iv_engine"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="3dp"
+            android:layout_centerInParent="true"
+            android:layout_marginBottom="-1dp"
             android:background="@null"
             android:src="@drawable/btn_engine_noemal" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="40dp"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/iv_engine"
             android:gravity="center"
             android:orientation="vertical">
 

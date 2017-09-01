@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -21,7 +19,6 @@ import com.baidu.mapapi.map.InfoWindow;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
-import com.baidu.mapapi.map.MapViewLayoutParams;
 import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.OverlayOptions;
@@ -126,6 +123,12 @@ public class LocusActivity extends BaseActivity {
             .fromResource(R.drawable.ic_red_marker);
     BitmapDescriptor bdStart = BitmapDescriptorFactory
             .fromResource(R.drawable.ic_blue_marker);
+
+    // 初始化全局 bitmap 信息，不用时及时 recycle
+    BitmapDescriptor bdEnd1 = BitmapDescriptorFactory
+            .fromResource(R.drawable.ic_end_marker);
+    BitmapDescriptor bdStart1 = BitmapDescriptorFactory
+            .fromResource(R.drawable.ic_start_marker);
 
     private LatLng le;
     private LatLng ls;
@@ -339,55 +342,58 @@ public class LocusActivity extends BaseActivity {
         ls = new LatLng(Double.parseDouble(startInfo.getLat()), Double.parseDouble(startInfo.getLng()));
         le = new LatLng(Double.parseDouble(endInfo.getLat()), Double.parseDouble(endInfo.getLng()));
 
-        LinearLayout inflate = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.layout_start, null);
-        TextView tvTime = (TextView) inflate.findViewById(R.id.tv_time);
-        ImageView ivIcon = (ImageView) inflate.findViewById(R.id.iv_icon);
+//        LinearLayout inflate = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.layout_start, null);
+//        TextView tvTime = (TextView) inflate.findViewById(R.id.tv_time);
+//        ImageView ivIcon = (ImageView) inflate.findViewById(R.id.iv_icon);
+//
+//        tvTime.setText(startInfo.getPt());
+//        ivIcon.setImageResource(R.drawable.ic_start_marker);
+//
+//        MapViewLayoutParams.Builder layoutParamsBuilder = new MapViewLayoutParams.Builder();
+//        layoutParamsBuilder.position(ls);
+//        layoutParamsBuilder.align(
+//                MapViewLayoutParams.ALIGN_CENTER_HORIZONTAL,
+//                MapViewLayoutParams.ALIGN_CENTER_VERTICAL);
+//        layoutParamsBuilder
+//                .layoutMode(MapViewLayoutParams.ELayoutMode.mapMode);
+//        map.addView(inflate, layoutParamsBuilder.build());
 
-        tvTime.setText(startInfo.getPt());
-        ivIcon.setImageResource(R.drawable.ic_start_marker);
+        MarkerOptions os = new MarkerOptions().position(ls).icon(bdStart1).zIndex(5);
+        markerStart = (Marker) baiduMap.addOverlay(os.anchor(0.6f, 0.8f));
 
-        MapViewLayoutParams.Builder layoutParamsBuilder = new MapViewLayoutParams.Builder();
-        layoutParamsBuilder.position(ls);
-        layoutParamsBuilder.align(
-                MapViewLayoutParams.ALIGN_CENTER_HORIZONTAL,
-                MapViewLayoutParams.ALIGN_CENTER_VERTICAL);
-        layoutParamsBuilder
-                .layoutMode(MapViewLayoutParams.ELayoutMode.mapMode);
-        map.addView(inflate, layoutParamsBuilder.build());
+        MarkerOptions o2 = new MarkerOptions().position(le).icon(bdEnd1).zIndex(5);
+        markerStart = (Marker) baiduMap.addOverlay(o2.anchor(0.6f, 0.8f));
 
-        MarkerOptions os = new MarkerOptions().position(ls).icon(bdStart).zIndex(5);
-        markerStart = (Marker) baiduMap.addOverlay(os.anchor(0.6f,0.8f));
-
-        LinearLayout ll = new LinearLayout(LocusActivity.this);
-        ll.setPadding(10, 5, 10, 5);
-        ll.setBackgroundResource(R.drawable.pic_pop_normal);
-        ll.setGravity(Gravity.CENTER);
-        ll.setOrientation(LinearLayout.HORIZONTAL);
-        ImageView iv = new ImageView(LocusActivity.this);
-        iv.setImageResource(R.drawable.ic_start_marker);
-        TextView tvS = new TextView(LocusActivity.this);
-        tvS.setText(startInfo.getPt());
-        ll.addView(iv);
-        ll.addView(tvS);
-        infoWindows = new InfoWindow(ll, markerStart.getPosition(), -47);
-        baiduMap.showInfoWindow(infoWindows);
-
-        MarkerOptions oe = new MarkerOptions().position(le).icon(bdEnd).zIndex(5);
-        markerEnd = (Marker) baiduMap.addOverlay(oe);
-
-        LinearLayout ll1 = new LinearLayout(LocusActivity.this);
-        ll1.setPadding(10, 5, 10, 5);
-        ll1.setBackgroundResource(R.drawable.pic_pop_normal);
-        ll1.setGravity(Gravity.CENTER);
-        ll1.setOrientation(LinearLayout.HORIZONTAL);
-        ImageView iv1 = new ImageView(LocusActivity.this);
-        iv1.setImageResource(R.drawable.ic_end_marker);
-        TextView tvS1 = new TextView(LocusActivity.this);
-        tvS1.setText(endInfo.getPt());
-        ll1.addView(iv1);
-        ll1.addView(tvS1);
-        infoWindowe = new InfoWindow(ll1, markerEnd.getPosition(), -47);
-        baiduMap.showInfoWindow(infoWindowe);
+//        LinearLayout ll = new LinearLayout(LocusActivity.this);
+//        ll.setPadding(10, 5, 10, 5);
+//        ll.setBackgroundResource(R.drawable.pic_pop_normal);
+//        ll.setGravity(Gravity.CENTER);
+//        ll.setOrientation(LinearLayout.HORIZONTAL);
+//        ImageView iv = new ImageView(LocusActivity.this);
+//        iv.setImageResource(R.drawable.ic_start_marker);
+//        TextView tvS = new TextView(LocusActivity.this);
+//        tvS.setText(startInfo.getPt());
+//        ll.addView(iv);
+//        ll.addView(tvS);
+//        infoWindows = new InfoWindow(ll, markerStart.getPosition(), -47);
+//        baiduMap.showInfoWindow(infoWindows);
+//
+//        MarkerOptions oe = new MarkerOptions().position(le).icon(bdEnd).zIndex(5);
+//        markerEnd = (Marker) baiduMap.addOverlay(oe);
+//
+//        LinearLayout ll1 = new LinearLayout(LocusActivity.this);
+//        ll1.setPadding(10, 5, 10, 5);
+//        ll1.setBackgroundResource(R.drawable.pic_pop_normal);
+//        ll1.setGravity(Gravity.CENTER);
+//        ll1.setOrientation(LinearLayout.HORIZONTAL);
+//        ImageView iv1 = new ImageView(LocusActivity.this);
+//        iv1.setImageResource(R.drawable.ic_end_marker);
+//        TextView tvS1 = new TextView(LocusActivity.this);
+//        tvS1.setText(endInfo.getPt());
+//        ll1.addView(iv1);
+//        ll1.addView(tvS1);
+//        infoWindowe = new InfoWindow(ll1, markerEnd.getPosition(), -47);
+//        baiduMap.showInfoWindow(infoWindowe);
 
         LatLngBounds latLngBounds = new LatLngBounds.Builder().include(ls).include(le).build();
         MapStatusUpdate u = MapStatusUpdateFactory

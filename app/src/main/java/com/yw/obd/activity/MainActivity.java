@@ -9,11 +9,13 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.yw.obd.R;
+import com.yw.obd.app.AppContext;
 import com.yw.obd.base.BaseActivity;
 import com.yw.obd.fragment.CarFragment;
 import com.yw.obd.fragment.FuelFragment;
 import com.yw.obd.fragment.HomeFragment;
 import com.yw.obd.fragment.MineFragment;
+import com.yw.obd.util.AppData;
 
 import butterknife.Bind;
 
@@ -100,6 +102,9 @@ public class MainActivity extends BaseActivity implements RadioGroup.OnCheckedCh
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
 //                            MainActivity.this.finish();
+                            if (AppData.GetInstance(MainActivity.this).getUserName().equals("888")) {
+                                AppData.GetInstance(MainActivity.this).clearSP(AppContext.getContext());
+                            }
                             android.os.Process.killProcess(android.os.Process.myPid());
                         }
                     }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

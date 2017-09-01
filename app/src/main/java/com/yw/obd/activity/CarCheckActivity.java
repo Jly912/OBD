@@ -6,17 +6,21 @@ import android.os.Message;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
+import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
+import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -65,6 +69,10 @@ public class CarCheckActivity extends BaseActivity {
     RecyclerView ry;
     @Bind(R.id.btn_Clear)
     Button btnClear;
+    @Bind(R.id.ll)
+    LinearLayout ll;
+    @Bind(R.id.ivScan)
+    ImageView ivScan;
     private boolean isLoad = true;
     private int value = 0;
     private int total = 20;
@@ -86,17 +94,20 @@ public class CarCheckActivity extends BaseActivity {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.what == MSG_RUN_ITEM) {
-                if (itemNum >= adap.getItemCount()) {
-                    ry.smoothScrollToPosition(adap.getItemCount() - 1);
+                //滚动中
+                if (itemNum <= 0) {
+                    itemNum = adap.getItemCount();
+                    ry.smoothScrollToPosition(0);
                 } else {
                     ry.smoothScrollToPosition(itemNum);
                 }
-            } else if (msg.what == MSG_RUN_ADD) {
+
+            } else if (msg.what == MSG_RUN_ADD) {//滚到第一个了
                 Log.e("print", "----");
-//                adapter.addData(err);
-                ry.scrollToPosition(0);
-                if (itemNum >= adap.getItemCount()) {
-                    ry.smoothScrollToPosition(adap.getItemCount() - 1);
+                ry.smoothScrollToPosition(adap.getItemCount());
+                if (itemNum <= 0) {
+                    ry.smoothScrollToPosition(0);
+                    itemNum = adap.getItemCount();
                 } else {
                     ry.smoothScrollToPosition(itemNum);
                 }
@@ -133,6 +144,20 @@ public class CarCheckActivity extends BaseActivity {
         err = new Gson().fromJson(json, tt.getType());
         runThread = new RunThread();
         ry.setFocusable(false);
+
+        if (err != null) {
+            ry.setLayoutManager(new LinearLayoutManager(this));
+            adap = new RyAdapter(this);
+            adap.setData(err);
+            ry.setAdapter(adap);
+            ry.scrollToPosition(adap.getItemCount() - 1);
+        }
+        isRun = true;
+//        itemNum = 5;
+        itemNum = adap.getItemCount();
+
+        startAnim();
+        runBar();
     }
 
     private String initError() {
@@ -154,35 +179,19 @@ public class CarCheckActivity extends BaseActivity {
      * 开始动画
      */
     private void startAnim() {
-        //xstart 0 ; xend 0; ystart 0; yend 800;  坐标
-        TranslateAnimation anim = new TranslateAnimation(0, 0, 0, 400);
-        //每一次循环的时间
-        anim.setDuration(2000);
-        //结束时候状态
-        anim.setFillAfter(true);
-        //重复的方式
-        anim.setRepeatMode(Animation.REVERSE);
-        //重复的次数
-        anim.setRepeatCount(Animation.INFINITE);
-        //开始动画
-        ivLine.startAnimation(anim);
+        Animation animation = AnimationUtils.loadAnimation(this, R.anim.roa);
+        LinearInterpolator interpolator = new LinearInterpolator();  //设置匀速旋转，在xml文件中设置会出现卡顿
+        animation.setInterpolator(interpolator);
+        if (animation != null) {
+            ivScan.startAnimation(animation);  //开始动画
+        }
     }
 
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (err != null) {
-            ry.setLayoutManager(new LinearLayoutManager(this));
-            adap = new RyAdapter(this);
-            adap.setData(err);
-            ry.setAdapter(adap);
-        }
-        isRun = true;
-        itemNum = 5;
 
-        startAnim();
-        runBar();
     }
 
     /**
@@ -197,7 +206,7 @@ public class CarCheckActivity extends BaseActivity {
         @Override
         public void run() {
             while (isRun) {
-                if (itemNum >= adap.getItemCount()) {
+                if (itemNum >= 0) {
                     handler.sendEmptyMessage(MSG_RUN_ADD);
                 } else {
                     handler.sendEmptyMessage(MSG_RUN_ITEM);
@@ -207,7 +216,7 @@ public class CarCheckActivity extends BaseActivity {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                itemNum += 5;
+                itemNum -= 4;
             }
         }
     };
@@ -239,6 +248,8 @@ public class CarCheckActivity extends BaseActivity {
                                                 int state = Integer.parseInt(jsonObject.getString("state"));
                                                 switch (state) {
                                                     case 0:
+                                                        ivScan.clearAnimation();
+                                                        ivScan.setVisibility(View.GONE);
                                                         ivLine.clearAnimation();
                                                         tvCheck.setText(R.string.check_succ);
                                                         AppData.showToast(CarCheckActivity.this, R.string.check_succ);
@@ -253,12 +264,14 @@ public class CarCheckActivity extends BaseActivity {
                                                             String str = jo.getString("str");
                                                             strs.add(str);
                                                         }
-
+                                                        ll.setVisibility(View.VISIBLE);
                                                         initList(codes, strs, name);
 
                                                         break;
                                                     case 2011:
                                                         ivLine.clearAnimation();
+                                                        ivScan.clearAnimation();
+                                                        ivScan.setVisibility(View.GONE);
                                                         tvCheck.setText(R.string.check_succ);
                                                         break;
                                                 }
@@ -395,5 +408,21 @@ public class CarCheckActivity extends BaseActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
+            if (isLoad) {
+                isLoad = false;
+            }
+
+            if (isRun) {
+                isRun = false;
+            }
+            this.finish();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

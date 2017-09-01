@@ -234,8 +234,9 @@ public class CarFragment extends BaseFragment implements SensorEventListener, Ac
                             return;
                         }
                         lockM = false;
+                        float zz = baiduMap.getMapStatus().zoom < 12f ? 18 : baiduMap.getMapStatus().zoom;
                         baiduMap.setMapStatus(MapStatusUpdateFactory.newLatLngZoom(latLng,
-                                baiduMap.getMapStatus().zoom < 12f ? 18 : baiduMap.getMapStatus().zoom));
+                                16f));
                         break;
                     case R.id.iv_people:
                         lockM = true;
@@ -678,7 +679,7 @@ public class CarFragment extends BaseFragment implements SensorEventListener, Ac
                     .longitude(location.getLongitude()).build();
 
             baiduMap.setMyLocationData(locData);
-
+            mLocClient.stop();
             if (isFirstLoc) {
                 //首次拒绝定位申请之后再同意会报错 所以采用handler更改地图状态
 //                LatLng ll = new LatLng(mCurrentLat, mCurrentLon);

@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -112,6 +113,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             win.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);//去掉信息栏
             win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);// 保持屏幕高亮
         } else {
+            Log.e("print", "Build.Version_SDK" + Build.VERSION.SDK_INT);
             if (isStatusBarTranslate) {
                 //KITKAT也能满足，只是SYSTEM_UI_FLAG_LIGHT_STATUS_BAR（状态栏字体颜色反转）只有在6.0才有效
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -125,13 +127,14 @@ public abstract class BaseActivity extends AppCompatActivity {
                     win.setStatusBarColor(getResources().getColor(R.color.tab));// SDK21
 
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-
-                    win.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-                    win.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+                    Log.e("print", "Build.Version_SDK---5.0---" + Build.VERSION.SDK_INT);
+                    win.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+//                    win.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
                     win.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                    win.setStatusBarColor(getResources().getColor(R.color.tool_color));
+                    win.setStatusBarColor(getResources().getColor(R.color.tab));
 
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    Log.e("print", "Build.Version_SDK---4.4---" + Build.VERSION.SDK_INT);
                     win.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
                 }
 

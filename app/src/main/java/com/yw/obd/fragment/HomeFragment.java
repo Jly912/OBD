@@ -40,8 +40,6 @@ import butterknife.OnClick;
  */
 
 public class HomeFragment extends BaseFragment {
-    @Bind(R.id.iv_drop)
-    ImageButton ivDrop;
     @Bind(R.id.iv_alarm)
     ImageButton ivAlarm;
     @Bind(R.id.tv_round)
@@ -94,11 +92,10 @@ public class HomeFragment extends BaseFragment {
         getDeviceList();
     }
 
-    @OnClick({R.id.iv_drop, R.id.iv_alarm, R.id.iv_engine, R.id.ll_car})
+    @OnClick({R.id.iv_alarm, R.id.iv_engine, R.id.ll_car})
     public void onViewClicked(View view) {
         switch (view.getId()) {
-            case R.id.iv_drop:
-                break;
+
             case R.id.iv_alarm://报警消息
                 if (addDeviceFirst()) return;
                 Intent intentMSG = new Intent(getActivity(), AlarmActivity.class);

@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.yw.obd.R;
+import com.yw.obd.app.AppContext;
 import com.yw.obd.base.BaseActivity;
 import com.yw.obd.entity.DeviceListInfo;
 import com.yw.obd.entity.LoginInfo;
@@ -61,6 +62,10 @@ public class LoginActivity extends BaseActivity {
                 .create();
 
         String userName = AppData.GetInstance(this).getUserName();
+        if (userName.equals("888")) {
+            AppData.GetInstance(this).clearSP(AppContext.getContext());
+            userName = "";
+        }
         etUser.setText(userName);
         etUser.setSelection(userName.length());
         if (AppData.GetInstance(this).getLoginRemember()) {
@@ -75,6 +80,46 @@ public class LoginActivity extends BaseActivity {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tv_experience://我要体验
+                loadingDia.show();
+                Http.getLogin(this, "888", "123456", new Http.OnListener() {
+                    @Override
+                    public void onSucc(Object object) {
+                        if (loadingDia != null && loadingDia.isShowing()) {
+                            loadingDia.dismiss();
+                        }
+
+                        String res = (String) object;
+                        try {
+                            int state = new JSONObject(res).getInt("state");
+                            switch (state) {
+                                case 0:
+                                    LoginInfo loginInfo = new Gson().fromJson(res, LoginInfo.class);
+//                                    AppData.showToast(LoginActivity.this, R.string.login_succ);
+                                    AppData.GetInstance(LoginActivity.this).setUserName("888");
+                                    AppData.GetInstance(LoginActivity.this).setTimeZone(loginInfo.getInfo().getTimeZone());
+                                    AppData.GetInstance(LoginActivity.this).setUserId(Integer.parseInt(loginInfo.getInfo().getUserID()));
+                                    AppData.GetInstance(LoginActivity.this).setLoginRemember(cb.isChecked());
+                                    AppData.GetInstance(LoginActivity.this).setUserPass("123456");
+                                    getDeviceList();
+                                    break;
+                                case 1008://手机号不存在
+                                    AppData.showToast(LoginActivity.this, R.string.user_empty);
+                                    break;
+                                case 2001://登录名或密码错误
+                                    AppData.showToast(LoginActivity.this, R.string.name_or_pwd_error);
+                                    break;
+                                case 1002://程序报错,异常.可能参数错误等
+                                    AppData.showToast(LoginActivity.this, R.string.exe_error);
+                                    break;
+                                case 3001://key不对
+                                    AppData.showToast(LoginActivity.this, R.string.key_error);
+                                    break;
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
                 break;
             case R.id.btn_login://登录
                 String user = etUser.getText().toString().trim();
@@ -104,7 +149,7 @@ public class LoginActivity extends BaseActivity {
                             switch (state) {
                                 case 0://成功
                                     LoginInfo loginInfo = new Gson().fromJson(res, LoginInfo.class);
-                                    AppData.showToast(LoginActivity.this, R.string.login_succ);
+//                                    AppData.showToast(LoginActivity.this, R.string.login_succ);
                                     AppData.GetInstance(LoginActivity.this).setUserName(etUser.getText().toString().trim());
                                     AppData.GetInstance(LoginActivity.this).setTimeZone(loginInfo.getInfo().getTimeZone());
                                     AppData.GetInstance(LoginActivity.this).setUserId(Integer.parseInt(loginInfo.getInfo().getUserID()));
